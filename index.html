@@ -643,16 +643,16 @@ Disassembly of section <span class="nl">.text</span><span class="p">:</span>
 
 <span class="c1">// Board definition</span>
 
-<span class="c1">// Workaround for _IO macros not being constexpr: those will be constant-folded</span>
-<span class="c1">// away</span>
+<span class="c1">// Workaround for _IO macros not being constexpr</span>
+<span class="c1">// They will be constant-folded away</span>
 <span class="k">const</span> <span class="kt">uintptr_t</span> <span class="n">DirB</span> <span class="o">=</span> <span class="k">reinterpret_cast</span><span class="o">&lt;</span><span class="kt">uintptr_t</span><span class="o">&gt;</span><span class="p">(</span><span class="o">&amp;</span><span class="n">DDRB</span><span class="p">);</span>
 <span class="k">const</span> <span class="kt">uintptr_t</span> <span class="n">PortB</span> <span class="o">=</span> <span class="k">reinterpret_cast</span><span class="o">&lt;</span><span class="kt">uintptr_t</span><span class="o">&gt;</span><span class="p">(</span><span class="o">&amp;</span><span class="n">PORTB</span><span class="p">);</span>
 
 <span class="c1">// Actual pin definitions</span>
 <span class="k">const</span> <span class="n">ArduinoPin</span><span class="o">&lt;</span><span class="n">AvrPinTraits</span><span class="o">&lt;</span><span class="n">DirB</span><span class="p">,</span> <span class="n">PortB</span><span class="p">,</span> <span class="n">PB0</span><span class="o">&gt;&gt;</span> <span class="n">D13</span><span class="p">{};</span>
 
-<span class="c1">// These are stateless, so we can  have aliases for free</span>
-<span class="k">const</span> <span class="n">ArduinoPin</span><span class="o">&lt;</span><span class="n">AvrPinTraits</span><span class="o">&lt;</span><span class="n">DirB</span><span class="p">,</span> <span class="n">PortB</span><span class="p">,</span> <span class="n">PB0</span><span class="o">&gt;&gt;</span> <span class="n">BuiltinLed</span><span class="p">{};</span>
+<span class="c1">// Alias pin names using references</span>
+<span class="k">const</span> <span class="k">auto</span> <span class="o">&amp;</span><span class="n">BuiltinLed</span><span class="p">{</span><span class="n">D13</span><span class="p">};</span>
 
 <span class="cp">#endif </span><span class="cm">/* _TEMPLATEDUINO_UNO_H_ */</span><span class="cp"></span>
 
