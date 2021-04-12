@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Arduino AVR Assembly comparison</title>
+    <style>
+      #container {
+        max-width: 800px;
+        margin: 0 auto;
+      }
+
+      .highlight .hll { background-color: #ffffcc }
+.highlight  { background: #f8f8f8; }
+.highlight .c { color: #408080; font-style: italic } /* Comment */
+.highlight .err { border: 1px solid #FF0000 } /* Error */
+.highlight .k { color: #008000; font-weight: bold } /* Keyword */
+.highlight .o { color: #666666 } /* Operator */
+.highlight .ch { color: #408080; font-style: italic } /* Comment.Hashbang */
+.highlight .cm { color: #408080; font-style: italic } /* Comment.Multiline */
+.highlight .cp { color: #BC7A00 } /* Comment.Preproc */
+.highlight .cpf { color: #408080; font-style: italic } /* Comment.PreprocFile */
+.highlight .c1 { color: #408080; font-style: italic } /* Comment.Single */
+.highlight .cs { color: #408080; font-style: italic } /* Comment.Special */
+.highlight .gd { color: #A00000 } /* Generic.Deleted */
+.highlight .ge { font-style: italic } /* Generic.Emph */
+.highlight .gr { color: #FF0000 } /* Generic.Error */
+.highlight .gh { color: #000080; font-weight: bold } /* Generic.Heading */
+.highlight .gi { color: #00A000 } /* Generic.Inserted */
+.highlight .go { color: #888888 } /* Generic.Output */
+.highlight .gp { color: #000080; font-weight: bold } /* Generic.Prompt */
+.highlight .gs { font-weight: bold } /* Generic.Strong */
+.highlight .gu { color: #800080; font-weight: bold } /* Generic.Subheading */
+.highlight .gt { color: #0044DD } /* Generic.Traceback */
+.highlight .kc { color: #008000; font-weight: bold } /* Keyword.Constant */
+.highlight .kd { color: #008000; font-weight: bold } /* Keyword.Declaration */
+.highlight .kn { color: #008000; font-weight: bold } /* Keyword.Namespace */
+.highlight .kp { color: #008000 } /* Keyword.Pseudo */
+.highlight .kr { color: #008000; font-weight: bold } /* Keyword.Reserved */
+.highlight .kt { color: #B00040 } /* Keyword.Type */
+.highlight .m { color: #666666 } /* Literal.Number */
+.highlight .s { color: #BA2121 } /* Literal.String */
+.highlight .na { color: #7D9029 } /* Name.Attribute */
+.highlight .nb { color: #008000 } /* Name.Builtin */
+.highlight .nc { color: #0000FF; font-weight: bold } /* Name.Class */
+.highlight .no { color: #880000 } /* Name.Constant */
+.highlight .nd { color: #AA22FF } /* Name.Decorator */
+.highlight .ni { color: #999999; font-weight: bold } /* Name.Entity */
+.highlight .ne { color: #D2413A; font-weight: bold } /* Name.Exception */
+.highlight .nf { color: #0000FF } /* Name.Function */
+.highlight .nl { color: #A0A000 } /* Name.Label */
+.highlight .nn { color: #0000FF; font-weight: bold } /* Name.Namespace */
+.highlight .nt { color: #008000; font-weight: bold } /* Name.Tag */
+.highlight .nv { color: #19177C } /* Name.Variable */
+.highlight .ow { color: #AA22FF; font-weight: bold } /* Operator.Word */
+.highlight .w { color: #bbbbbb } /* Text.Whitespace */
+.highlight .mb { color: #666666 } /* Literal.Number.Bin */
+.highlight .mf { color: #666666 } /* Literal.Number.Float */
+.highlight .mh { color: #666666 } /* Literal.Number.Hex */
+.highlight .mi { color: #666666 } /* Literal.Number.Integer */
+.highlight .mo { color: #666666 } /* Literal.Number.Oct */
+.highlight .sa { color: #BA2121 } /* Literal.String.Affix */
+.highlight .sb { color: #BA2121 } /* Literal.String.Backtick */
+.highlight .sc { color: #BA2121 } /* Literal.String.Char */
+.highlight .dl { color: #BA2121 } /* Literal.String.Delimiter */
+.highlight .sd { color: #BA2121; font-style: italic } /* Literal.String.Doc */
+.highlight .s2 { color: #BA2121 } /* Literal.String.Double */
+.highlight .se { color: #BB6622; font-weight: bold } /* Literal.String.Escape */
+.highlight .sh { color: #BA2121 } /* Literal.String.Heredoc */
+.highlight .si { color: #BB6688; font-weight: bold } /* Literal.String.Interpol */
+.highlight .sx { color: #008000 } /* Literal.String.Other */
+.highlight .sr { color: #BB6688 } /* Literal.String.Regex */
+.highlight .s1 { color: #BA2121 } /* Literal.String.Single */
+.highlight .ss { color: #19177C } /* Literal.String.Symbol */
+.highlight .bp { color: #008000 } /* Name.Builtin.Pseudo */
+.highlight .fm { color: #0000FF } /* Name.Function.Magic */
+.highlight .vc { color: #19177C } /* Name.Variable.Class */
+.highlight .vg { color: #19177C } /* Name.Variable.Global */
+.highlight .vi { color: #19177C } /* Name.Variable.Instance */
+.highlight .vm { color: #19177C } /* Name.Variable.Magic */
+.highlight .il { color: #666666 } /* Literal.Number.Integer.Long */
+
+      .highlight .err {
+        border: none;
+      }
+
+      .link-top {
+       font-size: small;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="container">
+      <h1>Arduino AVR Assembly comparison</h1>
+      <p>
+        This page was generated from <a
+          href="https://github.com/vtavernier/blog-arduino-internals">this
+          repository</a>, with the goal of demonstrating the code generation
+        differences between the Arduino framework built-ins for AVR
+        microcontrollers, and corresponding native AVR code.
+
+        See the accompanying <a
+          href="http://vtavernier.github.io/posts/arduino-internals-whats-behind-the-magic/">blog
+          post</a> for context.
+      </p>
+      <h2><a href="#toc" id="toc">#</a> Table of contents</h2>
+      <ul>
+        
+        <li>
+          <a href="#arduino">arduino</a>
+        </li>
+        
+        <li>
+          <a href="#avr">avr</a>
+        </li>
+        
+        <li>
+          <a href="#template">template</a>
+        </li>
+        
+      </ul>
+
+       
+      <h2>
+        <a href="#arduino" id="arduino">#</a> Variant:
+        <code>arduino</code> <a class="link-top" href="#toc">^</a>
+      </h2>
+      <h3>Binary size</h3>
+      <pre>
+      AVR Memory Usage
+----------------
+Device: atmega328p
+
+Program:     734 bytes (2.2% Full)
+(.text + .data + .bootloader)
+
+Data:          9 bytes (0.4% Full)
+(.data + .bss + .noinit)
+      </pre>
+      <h3>Disassembly</h3>
+      <div class="highlight"><pre><span></span><span class="nl">build/arduino/firmware.elf</span><span class="p">:</span>     file format <span class="s">elf32-avr</span>
+
+
+Disassembly of section <span class="nl">.text</span><span class="p">:</span>
+
+<span class="mh">00000000</span> <span class="p">&lt;</span><span class="nf">__vectors</span><span class="p">&gt;:</span>
+   <span class="nl">0:</span>	<span class="mh">0c 94 5c 00 </span>	<span class="nf">jmp</span>	<span class="mi">0xb8</span>	<span class="err">;</span> <span class="mh">0xb8</span> <span class="p">&lt;</span><span class="no">__ctors_end</span><span class="p">&gt;</span>
+   <span class="nl">4:</span>	<span class="mh">0c 94 6e 00 </span>	<span class="nf">jmp</span>	<span class="mi">0xdc</span>	<span class="err">;</span> <span class="mh">0xdc</span> <span class="p">&lt;</span><span class="no">__bad_interrupt</span><span class="p">&gt;</span>
+   <span class="nl">8:</span>	<span class="mh">0c 94 6e 00 </span>	<span class="nf">jmp</span>	<span class="mi">0xdc</span>	<span class="err">;</span> <span class="mh">0xdc</span> <span class="p">&lt;</span><span class="no">__bad_interrupt</span><span class="p">&gt;</span>
+   <span class="nl">c:</span>	<span class="mh">0c 94 6e 00 </span>	<span class="nf">jmp</span>	<span class="mi">0xdc</span>	<span class="err">;</span> <span class="mh">0xdc</span> <span class="p">&lt;</span><span class="no">__bad_interrupt</span><span class="p">&gt;</span>
+  <span class="nl">10:</span>	<span class="mh">0c 94 6e 00 </span>	<span class="nf">jmp</span>	<span class="mi">0xdc</span>	<span class="err">;</span> <span class="mh">0xdc</span> <span class="p">&lt;</span><span class="no">__bad_interrupt</span><span class="p">&gt;</span>
+  <span class="nl">14:</span>	<span class="mh">0c 94 6e 00 </span>	<span class="nf">jmp</span>	<span class="mi">0xdc</span>	<span class="err">;</span> <span class="mh">0xdc</span> <span class="p">&lt;</span><span class="no">__bad_interrupt</span><span class="p">&gt;</span>
+  <span class="nl">18:</span>	<span class="mh">0c 94 6e 00 </span>	<span class="nf">jmp</span>	<span class="mi">0xdc</span>	<span class="err">;</span> <span class="mh">0xdc</span> <span class="p">&lt;</span><span class="no">__bad_interrupt</span><span class="p">&gt;</span>
+  <span class="nl">1c:</span>	<span class="mh">0c 94 6e 00 </span>	<span class="nf">jmp</span>	<span class="mi">0xdc</span>	<span class="err">;</span> <span class="mh">0xdc</span> <span class="p">&lt;</span><span class="no">__bad_interrupt</span><span class="p">&gt;</span>
+  <span class="nl">20:</span>	<span class="mh">0c 94 6e 00 </span>	<span class="nf">jmp</span>	<span class="mi">0xdc</span>	<span class="err">;</span> <span class="mh">0xdc</span> <span class="p">&lt;</span><span class="no">__bad_interrupt</span><span class="p">&gt;</span>
+  <span class="nl">24:</span>	<span class="mh">0c 94 6e 00 </span>	<span class="nf">jmp</span>	<span class="mi">0xdc</span>	<span class="err">;</span> <span class="mh">0xdc</span> <span class="p">&lt;</span><span class="no">__bad_interrupt</span><span class="p">&gt;</span>
+  <span class="nl">28:</span>	<span class="mh">0c 94 6e 00 </span>	<span class="nf">jmp</span>	<span class="mi">0xdc</span>	<span class="err">;</span> <span class="mh">0xdc</span> <span class="p">&lt;</span><span class="no">__bad_interrupt</span><span class="p">&gt;</span>
+  <span class="nl">2c:</span>	<span class="mh">0c 94 6e 00 </span>	<span class="nf">jmp</span>	<span class="mi">0xdc</span>	<span class="err">;</span> <span class="mh">0xdc</span> <span class="p">&lt;</span><span class="no">__bad_interrupt</span><span class="p">&gt;</span>
+  <span class="nl">30:</span>	<span class="mh">0c 94 6e 00 </span>	<span class="nf">jmp</span>	<span class="mi">0xdc</span>	<span class="err">;</span> <span class="mh">0xdc</span> <span class="p">&lt;</span><span class="no">__bad_interrupt</span><span class="p">&gt;</span>
+  <span class="nl">34:</span>	<span class="mh">0c 94 6e 00 </span>	<span class="nf">jmp</span>	<span class="mi">0xdc</span>	<span class="err">;</span> <span class="mh">0xdc</span> <span class="p">&lt;</span><span class="no">__bad_interrupt</span><span class="p">&gt;</span>
+  <span class="nl">38:</span>	<span class="mh">0c 94 6e 00 </span>	<span class="nf">jmp</span>	<span class="mi">0xdc</span>	<span class="err">;</span> <span class="mh">0xdc</span> <span class="p">&lt;</span><span class="no">__bad_interrupt</span><span class="p">&gt;</span>
+  <span class="nl">3c:</span>	<span class="mh">0c 94 6e 00 </span>	<span class="nf">jmp</span>	<span class="mi">0xdc</span>	<span class="err">;</span> <span class="mh">0xdc</span> <span class="p">&lt;</span><span class="no">__bad_interrupt</span><span class="p">&gt;</span>
+  <span class="nl">40:</span>	<span class="mh">0c 94 b8 00 </span>	<span class="nf">jmp</span>	<span class="mi">0x170</span>	<span class="err">;</span> <span class="mh">0x170</span> <span class="p">&lt;</span><span class="no">__vector_16</span><span class="p">&gt;</span>
+  <span class="nl">44:</span>	<span class="mh">0c 94 6e 00 </span>	<span class="nf">jmp</span>	<span class="mi">0xdc</span>	<span class="err">;</span> <span class="mh">0xdc</span> <span class="p">&lt;</span><span class="no">__bad_interrupt</span><span class="p">&gt;</span>
+  <span class="nl">48:</span>	<span class="mh">0c 94 6e 00 </span>	<span class="nf">jmp</span>	<span class="mi">0xdc</span>	<span class="err">;</span> <span class="mh">0xdc</span> <span class="p">&lt;</span><span class="no">__bad_interrupt</span><span class="p">&gt;</span>
+  <span class="nl">4c:</span>	<span class="mh">0c 94 6e 00 </span>	<span class="nf">jmp</span>	<span class="mi">0xdc</span>	<span class="err">;</span> <span class="mh">0xdc</span> <span class="p">&lt;</span><span class="no">__bad_interrupt</span><span class="p">&gt;</span>
+  <span class="nl">50:</span>	<span class="mh">0c 94 6e 00 </span>	<span class="nf">jmp</span>	<span class="mi">0xdc</span>	<span class="err">;</span> <span class="mh">0xdc</span> <span class="p">&lt;</span><span class="no">__bad_interrupt</span><span class="p">&gt;</span>
+  <span class="nl">54:</span>	<span class="mh">0c 94 6e 00 </span>	<span class="nf">jmp</span>	<span class="mi">0xdc</span>	<span class="err">;</span> <span class="mh">0xdc</span> <span class="p">&lt;</span><span class="no">__bad_interrupt</span><span class="p">&gt;</span>
+  <span class="nl">58:</span>	<span class="mh">0c 94 6e 00 </span>	<span class="nf">jmp</span>	<span class="mi">0xdc</span>	<span class="err">;</span> <span class="mh">0xdc</span> <span class="p">&lt;</span><span class="no">__bad_interrupt</span><span class="p">&gt;</span>
+  <span class="nl">5c:</span>	<span class="mh">0c 94 6e 00 </span>	<span class="nf">jmp</span>	<span class="mi">0xdc</span>	<span class="err">;</span> <span class="mh">0xdc</span> <span class="p">&lt;</span><span class="no">__bad_interrupt</span><span class="p">&gt;</span>
+  <span class="nl">60:</span>	<span class="mh">0c 94 6e 00 </span>	<span class="nf">jmp</span>	<span class="mi">0xdc</span>	<span class="err">;</span> <span class="mh">0xdc</span> <span class="p">&lt;</span><span class="no">__bad_interrupt</span><span class="p">&gt;</span>
+  <span class="nl">64:</span>	<span class="mh">0c 94 6e 00 </span>	<span class="nf">jmp</span>	<span class="mi">0xdc</span>	<span class="err">;</span> <span class="mh">0xdc</span> <span class="p">&lt;</span><span class="no">__bad_interrupt</span><span class="p">&gt;</span>
+
+<span class="mh">00000068</span> <span class="p">&lt;</span><span class="nf">__trampolines_end</span><span class="p">&gt;:</span>
+  <span class="nl">68:</span>	<span class="mh">00 00 </span>      	<span class="nf">nop</span>
+  <span class="nl">6a:</span>	<span class="mh">00 00 </span>      	<span class="nf">nop</span>
+  <span class="nl">6c:</span>	<span class="mh">24 00 </span>      <span class="s">	.word	0x0024	; ????</span>
+  <span class="nl">6e:</span>	<span class="mh">27 00 </span>      <span class="s">	.word	0x0027	; ????</span>
+  <span class="nl">70:</span>	<span class="mh">2a 00 </span>      <span class="s">	.word	0x002a	; ????</span>
+
+<span class="mh">00000072</span> <span class="p">&lt;</span><span class="nf">port_to_output_PGM</span><span class="p">&gt;:</span>
+  <span class="nl">72:</span>	<span class="mh">00 00 00 00 25 00 28 00 2b 00 </span>                      <span class="s">....%.(.+.</span>
+
+<span class="mh">0000007c</span> <span class="p">&lt;</span><span class="nf">digital_pin_to_port_PGM</span><span class="p">&gt;:</span>
+  <span class="nl">7c:</span>	<span class="mh">04 04 04 04 04 04 04 04 02 02 02 02 02 02 03 03 </span>    <span class="s">................</span>
+  <span class="nl">8c:</span>	<span class="mh">03 03 03 03 </span>                                        <span class="s">....</span>
+
+<span class="mh">00000090</span> <span class="p">&lt;</span><span class="nf">digital_pin_to_bit_mask_PGM</span><span class="p">&gt;:</span>
+  <span class="nl">90:</span>	<span class="mh">01 02 04 08 10 20 40 80 01 02 04 08 10 20 01 02 </span>    <span class="s">..... @...... ..</span>
+  <span class="nl">a0:</span>	<span class="mh">04 08 10 20 </span>                                        <span class="s">... </span>
+
+<span class="mh">000000a4</span> <span class="p">&lt;</span><span class="nf">digital_pin_to_timer_PGM</span><span class="p">&gt;:</span>
+  <span class="nl">a4:</span>	<span class="mh">00 00 00 08 00 02 01 00 00 03 04 07 00 00 00 00 </span>    <span class="s">................</span>
+  <span class="nl">b4:</span>	<span class="mh">00 00 00 00 </span>                                        <span class="s">....</span>
+
+<span class="mh">000000b8</span> <span class="p">&lt;</span><span class="nf">__ctors_end</span><span class="p">&gt;:</span>
+  <span class="nl">b8:</span>	<span class="mh">11 24 </span>      	<span class="nf">eor</span>	<span class="no">r1</span><span class="p">,</span> <span class="no">r1</span>
+  <span class="nl">ba:</span>	<span class="mh">1f be </span>      	<span class="nf">out</span>	<span class="mi">0x3f</span><span class="p">,</span> <span class="no">r1</span>	<span class="err">;</span> <span class="mi">63</span>
+  <span class="nl">bc:</span>	<span class="mh">cf ef </span>      	<span class="nf">ldi</span>	<span class="no">r28</span><span class="p">,</span> <span class="mi">0xFF</span>	<span class="err">;</span> <span class="mi">255</span>
+  <span class="nl">be:</span>	<span class="mh">d8 e0 </span>      	<span class="nf">ldi</span>	<span class="no">r29</span><span class="p">,</span> <span class="mi">0x08</span>	<span class="err">;</span> <span class="mi">8</span>
+  <span class="nl">c0:</span>	<span class="mh">de bf </span>      	<span class="nf">out</span>	<span class="mi">0x3e</span><span class="p">,</span> <span class="no">r29</span>	<span class="err">;</span> <span class="mi">62</span>
+  <span class="nl">c2:</span>	<span class="mh">cd bf </span>      	<span class="nf">out</span>	<span class="mi">0x3d</span><span class="p">,</span> <span class="no">r28</span>	<span class="err">;</span> <span class="mi">61</span>
+
+<span class="mh">000000c4</span> <span class="p">&lt;</span><span class="nf">__do_clear_bss</span><span class="p">&gt;:</span>
+  <span class="nl">c4:</span>	<span class="mh">21 e0 </span>      	<span class="nf">ldi</span>	<span class="no">r18</span><span class="p">,</span> <span class="mi">0x01</span>	<span class="err">;</span> <span class="mi">1</span>
+  <span class="nl">c6:</span>	<span class="mh">a0 e0 </span>      	<span class="nf">ldi</span>	<span class="no">r26</span><span class="p">,</span> <span class="mi">0x00</span>	<span class="err">;</span> <span class="mi">0</span>
+  <span class="nl">c8:</span>	<span class="mh">b1 e0 </span>      	<span class="nf">ldi</span>	<span class="no">r27</span><span class="p">,</span> <span class="mi">0x01</span>	<span class="err">;</span> <span class="mi">1</span>
+  <span class="nl">ca:</span>	<span class="mh">01 c0 </span>      	<span class="nf">rjmp</span>	<span class="p">.</span><span class="err">+</span><span class="mi">2</span>      	<span class="err">;</span> <span class="mh">0xce</span> <span class="p">&lt;</span><span class="no">.do_clear_bss_start</span><span class="p">&gt;</span>
+
+<span class="mh">000000cc</span> <span class="p">&lt;</span><span class="nf">.do_clear_bss_loop</span><span class="p">&gt;:</span>
+  <span class="nl">cc:</span>	<span class="mh">1d 92 </span>      	<span class="nf">st</span>	<span class="no">X</span><span class="err">+</span><span class="p">,</span> <span class="no">r1</span>
+
+<span class="mh">000000ce</span> <span class="p">&lt;</span><span class="nf">.do_clear_bss_start</span><span class="p">&gt;:</span>
+  <span class="nl">ce:</span>	<span class="mh">a9 30 </span>      	<span class="nf">cpi</span>	<span class="no">r26</span><span class="p">,</span> <span class="mi">0x09</span>	<span class="err">;</span> <span class="mi">9</span>
+  <span class="nl">d0:</span>	<span class="mh">b2 07 </span>      	<span class="nf">cpc</span>	<span class="no">r27</span><span class="p">,</span> <span class="no">r18</span>
+  <span class="nl">d2:</span>	<span class="mh">e1 f7 </span>      	<span class="nf">brne</span>	<span class="no">.-8</span>      	<span class="err">;</span> <span class="mh">0xcc</span> <span class="p">&lt;</span><span class="no">.do_clear_bss_loop</span><span class="p">&gt;</span>
+  <span class="nl">d4:</span>	<span class="mh">0e 94 02 01 </span>	<span class="nf">call</span>	<span class="mi">0x204</span>	<span class="err">;</span> <span class="mh">0x204</span> <span class="p">&lt;</span><span class="no">main</span><span class="p">&gt;</span>
+  <span class="nl">d8:</span>	<span class="mh">0c 94 6d 01 </span>	<span class="nf">jmp</span>	<span class="mi">0x2da</span>	<span class="err">;</span> <span class="mh">0x2da</span> <span class="p">&lt;</span><span class="no">_exit</span><span class="p">&gt;</span>
+
+<span class="mh">000000dc</span> <span class="p">&lt;</span><span class="nf">__bad_interrupt</span><span class="p">&gt;:</span>
+  <span class="nl">dc:</span>	<span class="mh">0c 94 00 00 </span>	<span class="nf">jmp</span>	<span class="mi">0</span>	<span class="err">;</span> <span class="mh">0x0</span> <span class="p">&lt;</span><span class="no">__vectors</span><span class="p">&gt;</span>
+
+<span class="mh">000000e0</span> <span class="p">&lt;</span><span class="nf">digitalWrite.constprop.0</span><span class="p">&gt;:</span>
+  <span class="nl">e0:</span>	<span class="mh">e1 eb </span>      	<span class="nf">ldi</span>	<span class="no">r30</span><span class="p">,</span> <span class="mi">0xB1</span>	<span class="err">;</span> <span class="mi">177</span>
+  <span class="nl">e2:</span>	<span class="mh">f0 e0 </span>      	<span class="nf">ldi</span>	<span class="no">r31</span><span class="p">,</span> <span class="mi">0x00</span>	<span class="err">;</span> <span class="mi">0</span>
+  <span class="nl">e4:</span>	<span class="mh">24 91 </span>      	<span class="nf">lpm</span>	<span class="no">r18</span><span class="p">,</span> <span class="no">Z</span>
+  <span class="nl">e6:</span>	<span class="mh">ed e9 </span>      	<span class="nf">ldi</span>	<span class="no">r30</span><span class="p">,</span> <span class="mi">0x9D</span>	<span class="err">;</span> <span class="mi">157</span>
+  <span class="nl">e8:</span>	<span class="mh">f0 e0 </span>      	<span class="nf">ldi</span>	<span class="no">r31</span><span class="p">,</span> <span class="mi">0x00</span>	<span class="err">;</span> <span class="mi">0</span>
+  <span class="nl">ea:</span>	<span class="mh">94 91 </span>      	<span class="nf">lpm</span>	<span class="no">r25</span><span class="p">,</span> <span class="no">Z</span>
+  <span class="nl">ec:</span>	<span class="mh">e9 e8 </span>      	<span class="nf">ldi</span>	<span class="no">r30</span><span class="p">,</span> <span class="mi">0x89</span>	<span class="err">;</span> <span class="mi">137</span>
+  <span class="nl">ee:</span>	<span class="mh">f0 e0 </span>      	<span class="nf">ldi</span>	<span class="no">r31</span><span class="p">,</span> <span class="mi">0x00</span>	<span class="err">;</span> <span class="mi">0</span>
+  <span class="nl">f0:</span>	<span class="mh">e4 91 </span>      	<span class="nf">lpm</span>	<span class="no">r30</span><span class="p">,</span> <span class="no">Z</span>
+  <span class="nl">f2:</span>	<span class="mh">ee 23 </span>      	<span class="nf">and</span>	<span class="no">r30</span><span class="p">,</span> <span class="no">r30</span>
+  <span class="nl">f4:</span>	<span class="mh">c9 f0 </span>      	<span class="nf">breq</span>	<span class="p">.</span><span class="err">+</span><span class="mi">50</span>     	<span class="err">;</span> <span class="mh">0x128</span> <span class="p">&lt;</span><span class="no">digitalWrite.constprop.0</span><span class="p">+</span><span class="mi">0x48</span><span class="p">&gt;</span>
+  <span class="nl">f6:</span>	<span class="mh">22 23 </span>      	<span class="nf">and</span>	<span class="no">r18</span><span class="p">,</span> <span class="no">r18</span>
+  <span class="nl">f8:</span>	<span class="mh">39 f0 </span>      	<span class="nf">breq</span>	<span class="p">.</span><span class="err">+</span><span class="mi">14</span>     	<span class="err">;</span> <span class="mh">0x108</span> <span class="p">&lt;</span><span class="no">digitalWrite.constprop.0</span><span class="p">+</span><span class="mi">0x28</span><span class="p">&gt;</span>
+  <span class="nl">fa:</span>	<span class="mh">23 30 </span>      	<span class="nf">cpi</span>	<span class="no">r18</span><span class="p">,</span> <span class="mi">0x03</span>	<span class="err">;</span> <span class="mi">3</span>
+  <span class="nl">fc:</span>	<span class="mh">01 f1 </span>      	<span class="nf">breq</span>	<span class="p">.</span><span class="err">+</span><span class="mi">64</span>     	<span class="err">;</span> <span class="mh">0x13e</span> <span class="p">&lt;</span><span class="no">digitalWrite.constprop.0</span><span class="p">+</span><span class="mi">0x5e</span><span class="p">&gt;</span>
+  <span class="nl">fe:</span>	<span class="mh">a8 f4 </span>      	<span class="nf">brcc</span>	<span class="p">.</span><span class="err">+</span><span class="mi">42</span>     	<span class="err">;</span> <span class="mh">0x12a</span> <span class="p">&lt;</span><span class="no">digitalWrite.constprop.0</span><span class="p">+</span><span class="mi">0x4a</span><span class="p">&gt;</span>
+ <span class="nl">100:</span>	<span class="mh">21 30 </span>      	<span class="nf">cpi</span>	<span class="no">r18</span><span class="p">,</span> <span class="mi">0x01</span>	<span class="err">;</span> <span class="mi">1</span>
+ <span class="nl">102:</span>	<span class="mh">19 f1 </span>      	<span class="nf">breq</span>	<span class="p">.</span><span class="err">+</span><span class="mi">70</span>     	<span class="err">;</span> <span class="mh">0x14a</span> <span class="p">&lt;</span><span class="no">digitalWrite.constprop.0</span><span class="p">+</span><span class="mi">0x6a</span><span class="p">&gt;</span>
+ <span class="nl">104:</span>	<span class="mh">22 30 </span>      	<span class="nf">cpi</span>	<span class="no">r18</span><span class="p">,</span> <span class="mi">0x02</span>	<span class="err">;</span> <span class="mi">2</span>
+ <span class="nl">106:</span>	<span class="mh">29 f1 </span>      	<span class="nf">breq</span>	<span class="p">.</span><span class="err">+</span><span class="mi">74</span>     	<span class="err">;</span> <span class="mh">0x152</span> <span class="p">&lt;</span><span class="no">digitalWrite.constprop.0</span><span class="p">+</span><span class="mi">0x72</span><span class="p">&gt;</span>
+ <span class="nl">108:</span>	<span class="mh">f0 e0 </span>      	<span class="nf">ldi</span>	<span class="no">r31</span><span class="p">,</span> <span class="mi">0x00</span>	<span class="err">;</span> <span class="mi">0</span>
+ <span class="nl">10a:</span>	<span class="mh">ee 0f </span>      	<span class="nf">add</span>	<span class="no">r30</span><span class="p">,</span> <span class="no">r30</span>
+ <span class="nl">10c:</span>	<span class="mh">ff 1f </span>      	<span class="nf">adc</span>	<span class="no">r31</span><span class="p">,</span> <span class="no">r31</span>
+ <span class="nl">10e:</span>	<span class="mh">ee 58 </span>      	<span class="nf">subi</span>	<span class="no">r30</span><span class="p">,</span> <span class="mi">0x8E</span>	<span class="err">;</span> <span class="mi">142</span>
+ <span class="nl">110:</span>	<span class="mh">ff 4f </span>      	<span class="nf">sbci</span>	<span class="no">r31</span><span class="p">,</span> <span class="mi">0xFF</span>	<span class="err">;</span> <span class="mi">255</span>
+ <span class="nl">112:</span>	<span class="mh">a5 91 </span>      	<span class="nf">lpm</span>	<span class="no">r26</span><span class="p">,</span> <span class="no">Z</span><span class="err">+</span>
+ <span class="nl">114:</span>	<span class="mh">b4 91 </span>      	<span class="nf">lpm</span>	<span class="no">r27</span><span class="p">,</span> <span class="no">Z</span>
+ <span class="nl">116:</span>	<span class="mh">2f b7 </span>      	<span class="nf">in</span>	<span class="no">r18</span><span class="p">,</span> <span class="mi">0x3f</span>	<span class="err">;</span> <span class="mi">63</span>
+ <span class="nl">118:</span>	<span class="mh">f8 94 </span>      	<span class="nf">cli</span>
+ <span class="nl">11a:</span>	<span class="mh">ec 91 </span>      	<span class="nf">ld</span>	<span class="no">r30</span><span class="p">,</span> <span class="no">X</span>
+ <span class="nl">11c:</span>	<span class="mh">81 11 </span>      	<span class="nf">cpse</span>	<span class="no">r24</span><span class="p">,</span> <span class="no">r1</span>
+ <span class="nl">11e:</span>	<span class="mh">26 c0 </span>      	<span class="nf">rjmp</span>	<span class="p">.</span><span class="err">+</span><span class="mi">76</span>     	<span class="err">;</span> <span class="mh">0x16c</span> <span class="p">&lt;</span><span class="no">digitalWrite.constprop.0</span><span class="p">+</span><span class="mi">0x8c</span><span class="p">&gt;</span>
+ <span class="nl">120:</span>	<span class="mh">90 95 </span>      	<span class="nf">com</span>	<span class="no">r25</span>
+ <span class="nl">122:</span>	<span class="mh">9e 23 </span>      	<span class="nf">and</span>	<span class="no">r25</span><span class="p">,</span> <span class="no">r30</span>
+ <span class="nl">124:</span>	<span class="mh">9c 93 </span>      	<span class="nf">st</span>	<span class="no">X</span><span class="p">,</span> <span class="no">r25</span>
+ <span class="nl">126:</span>	<span class="mh">2f bf </span>      	<span class="nf">out</span>	<span class="mi">0x3f</span><span class="p">,</span> <span class="no">r18</span>	<span class="err">;</span> <span class="mi">63</span>
+ <span class="nl">128:</span>	<span class="mh">08 95 </span>      	<span class="nf">ret</span>
+ <span class="nl">12a:</span>	<span class="mh">27 30 </span>      	<span class="nf">cpi</span>	<span class="no">r18</span><span class="p">,</span> <span class="mi">0x07</span>	<span class="err">;</span> <span class="mi">7</span>
+ <span class="nl">12c:</span>	<span class="mh">a9 f0 </span>      	<span class="nf">breq</span>	<span class="p">.</span><span class="err">+</span><span class="mi">42</span>     	<span class="err">;</span> <span class="mh">0x158</span> <span class="p">&lt;</span><span class="no">digitalWrite.constprop.0</span><span class="p">+</span><span class="mi">0x78</span><span class="p">&gt;</span>
+ <span class="nl">12e:</span>	<span class="mh">28 30 </span>      	<span class="nf">cpi</span>	<span class="no">r18</span><span class="p">,</span> <span class="mi">0x08</span>	<span class="err">;</span> <span class="mi">8</span>
+ <span class="nl">130:</span>	<span class="mh">c9 f0 </span>      	<span class="nf">breq</span>	<span class="p">.</span><span class="err">+</span><span class="mi">50</span>     	<span class="err">;</span> <span class="mh">0x164</span> <span class="p">&lt;</span><span class="no">digitalWrite.constprop.0</span><span class="p">+</span><span class="mi">0x84</span><span class="p">&gt;</span>
+ <span class="nl">132:</span>	<span class="mh">24 30 </span>      	<span class="nf">cpi</span>	<span class="no">r18</span><span class="p">,</span> <span class="mi">0x04</span>	<span class="err">;</span> <span class="mi">4</span>
+ <span class="nl">134:</span>	<span class="mh">49 f7 </span>      	<span class="nf">brne</span>	<span class="no">.-46</span>     	<span class="err">;</span> <span class="mh">0x108</span> <span class="p">&lt;</span><span class="no">digitalWrite.constprop.0</span><span class="p">+</span><span class="mi">0x28</span><span class="p">&gt;</span>
+ <span class="nl">136:</span>	<span class="mh">20 91 80 00 </span>	<span class="nf">lds</span>	<span class="no">r18</span><span class="p">,</span> <span class="mi">0x0080</span>	<span class="err">;</span> <span class="mh">0x800080</span> <span class="p">&lt;</span><span class="no">__TEXT_REGION_LENGTH__</span><span class="p">+</span><span class="mi">0x7e0080</span><span class="p">&gt;</span>
+ <span class="nl">13a:</span>	<span class="mh">2f 7d </span>      	<span class="nf">andi</span>	<span class="no">r18</span><span class="p">,</span> <span class="mi">0xDF</span>	<span class="err">;</span> <span class="mi">223</span>
+ <span class="nl">13c:</span>	<span class="mh">03 c0 </span>      	<span class="nf">rjmp</span>	<span class="p">.</span><span class="err">+</span><span class="mi">6</span>      	<span class="err">;</span> <span class="mh">0x144</span> <span class="p">&lt;</span><span class="no">digitalWrite.constprop.0</span><span class="p">+</span><span class="mi">0x64</span><span class="p">&gt;</span>
+ <span class="nl">13e:</span>	<span class="mh">20 91 80 00 </span>	<span class="nf">lds</span>	<span class="no">r18</span><span class="p">,</span> <span class="mi">0x0080</span>	<span class="err">;</span> <span class="mh">0x800080</span> <span class="p">&lt;</span><span class="no">__TEXT_REGION_LENGTH__</span><span class="p">+</span><span class="mi">0x7e0080</span><span class="p">&gt;</span>
+ <span class="nl">142:</span>	<span class="mh">2f 77 </span>      	<span class="nf">andi</span>	<span class="no">r18</span><span class="p">,</span> <span class="mi">0x7F</span>	<span class="err">;</span> <span class="mi">127</span>
+ <span class="nl">144:</span>	<span class="mh">20 93 80 00 </span>	<span class="nf">sts</span>	<span class="mi">0x0080</span><span class="p">,</span> <span class="no">r18</span>	<span class="err">;</span> <span class="mh">0x800080</span> <span class="p">&lt;</span><span class="no">__TEXT_REGION_LENGTH__</span><span class="p">+</span><span class="mi">0x7e0080</span><span class="p">&gt;</span>
+ <span class="nl">148:</span>	<span class="mh">df cf </span>      	<span class="nf">rjmp</span>	<span class="no">.-66</span>     	<span class="err">;</span> <span class="mh">0x108</span> <span class="p">&lt;</span><span class="no">digitalWrite.constprop.0</span><span class="p">+</span><span class="mi">0x28</span><span class="p">&gt;</span>
+ <span class="nl">14a:</span>	<span class="mh">24 b5 </span>      	<span class="nf">in</span>	<span class="no">r18</span><span class="p">,</span> <span class="mi">0x24</span>	<span class="err">;</span> <span class="mi">36</span>
+ <span class="nl">14c:</span>	<span class="mh">2f 77 </span>      	<span class="nf">andi</span>	<span class="no">r18</span><span class="p">,</span> <span class="mi">0x7F</span>	<span class="err">;</span> <span class="mi">127</span>
+ <span class="nl">14e:</span>	<span class="mh">24 bd </span>      	<span class="nf">out</span>	<span class="mi">0x24</span><span class="p">,</span> <span class="no">r18</span>	<span class="err">;</span> <span class="mi">36</span>
+ <span class="nl">150:</span>	<span class="mh">db cf </span>      	<span class="nf">rjmp</span>	<span class="no">.-74</span>     	<span class="err">;</span> <span class="mh">0x108</span> <span class="p">&lt;</span><span class="no">digitalWrite.constprop.0</span><span class="p">+</span><span class="mi">0x28</span><span class="p">&gt;</span>
+ <span class="nl">152:</span>	<span class="mh">24 b5 </span>      	<span class="nf">in</span>	<span class="no">r18</span><span class="p">,</span> <span class="mi">0x24</span>	<span class="err">;</span> <span class="mi">36</span>
+ <span class="nl">154:</span>	<span class="mh">2f 7d </span>      	<span class="nf">andi</span>	<span class="no">r18</span><span class="p">,</span> <span class="mi">0xDF</span>	<span class="err">;</span> <span class="mi">223</span>
+ <span class="nl">156:</span>	<span class="mh">fb cf </span>      	<span class="nf">rjmp</span>	<span class="no">.-10</span>     	<span class="err">;</span> <span class="mh">0x14e</span> <span class="p">&lt;</span><span class="no">digitalWrite.constprop.0</span><span class="p">+</span><span class="mi">0x6e</span><span class="p">&gt;</span>
+ <span class="nl">158:</span>	<span class="mh">20 91 b0 00 </span>	<span class="nf">lds</span>	<span class="no">r18</span><span class="p">,</span> <span class="mi">0x00B0</span>	<span class="err">;</span> <span class="mh">0x8000b0</span> <span class="p">&lt;</span><span class="no">__TEXT_REGION_LENGTH__</span><span class="p">+</span><span class="mi">0x7e00b0</span><span class="p">&gt;</span>
+ <span class="nl">15c:</span>	<span class="mh">2f 77 </span>      	<span class="nf">andi</span>	<span class="no">r18</span><span class="p">,</span> <span class="mi">0x7F</span>	<span class="err">;</span> <span class="mi">127</span>
+ <span class="nl">15e:</span>	<span class="mh">20 93 b0 00 </span>	<span class="nf">sts</span>	<span class="mi">0x00B0</span><span class="p">,</span> <span class="no">r18</span>	<span class="err">;</span> <span class="mh">0x8000b0</span> <span class="p">&lt;</span><span class="no">__TEXT_REGION_LENGTH__</span><span class="p">+</span><span class="mi">0x7e00b0</span><span class="p">&gt;</span>
+ <span class="nl">162:</span>	<span class="mh">d2 cf </span>      	<span class="nf">rjmp</span>	<span class="no">.-92</span>     	<span class="err">;</span> <span class="mh">0x108</span> <span class="p">&lt;</span><span class="no">digitalWrite.constprop.0</span><span class="p">+</span><span class="mi">0x28</span><span class="p">&gt;</span>
+ <span class="nl">164:</span>	<span class="mh">20 91 b0 00 </span>	<span class="nf">lds</span>	<span class="no">r18</span><span class="p">,</span> <span class="mi">0x00B0</span>	<span class="err">;</span> <span class="mh">0x8000b0</span> <span class="p">&lt;</span><span class="no">__TEXT_REGION_LENGTH__</span><span class="p">+</span><span class="mi">0x7e00b0</span><span class="p">&gt;</span>
+ <span class="nl">168:</span>	<span class="mh">2f 7d </span>      	<span class="nf">andi</span>	<span class="no">r18</span><span class="p">,</span> <span class="mi">0xDF</span>	<span class="err">;</span> <span class="mi">223</span>
+ <span class="nl">16a:</span>	<span class="mh">f9 cf </span>      	<span class="nf">rjmp</span>	<span class="no">.-14</span>     	<span class="err">;</span> <span class="mh">0x15e</span> <span class="p">&lt;</span><span class="no">digitalWrite.constprop.0</span><span class="p">+</span><span class="mi">0x7e</span><span class="p">&gt;</span>
+ <span class="nl">16c:</span>	<span class="mh">9e 2b </span>      	<span class="nf">or</span>	<span class="no">r25</span><span class="p">,</span> <span class="no">r30</span>
+ <span class="nl">16e:</span>	<span class="mh">da cf </span>      	<span class="nf">rjmp</span>	<span class="no">.-76</span>     	<span class="err">;</span> <span class="mh">0x124</span> <span class="p">&lt;</span><span class="no">digitalWrite.constprop.0</span><span class="p">+</span><span class="mi">0x44</span><span class="p">&gt;</span>
+
+<span class="mh">00000170</span> <span class="p">&lt;</span><span class="nf">__vector_16</span><span class="p">&gt;:</span>
+ <span class="nl">170:</span>	<span class="mh">1f 92 </span>      	<span class="nf">push</span>	<span class="no">r1</span>
+ <span class="nl">172:</span>	<span class="mh">0f 92 </span>      	<span class="nf">push</span>	<span class="no">r0</span>
+ <span class="nl">174:</span>	<span class="mh">0f b6 </span>      	<span class="nf">in</span>	<span class="no">r0</span><span class="p">,</span> <span class="mi">0x3f</span>	<span class="err">;</span> <span class="mi">63</span>
+ <span class="nl">176:</span>	<span class="mh">0f 92 </span>      	<span class="nf">push</span>	<span class="no">r0</span>
+ <span class="nl">178:</span>	<span class="mh">11 24 </span>      	<span class="nf">eor</span>	<span class="no">r1</span><span class="p">,</span> <span class="no">r1</span>
+ <span class="nl">17a:</span>	<span class="mh">2f 93 </span>      	<span class="nf">push</span>	<span class="no">r18</span>
+ <span class="nl">17c:</span>	<span class="mh">3f 93 </span>      	<span class="nf">push</span>	<span class="no">r19</span>
+ <span class="nl">17e:</span>	<span class="mh">8f 93 </span>      	<span class="nf">push</span>	<span class="no">r24</span>
+ <span class="nl">180:</span>	<span class="mh">9f 93 </span>      	<span class="nf">push</span>	<span class="no">r25</span>
+ <span class="nl">182:</span>	<span class="mh">af 93 </span>      	<span class="nf">push</span>	<span class="no">r26</span>
+ <span class="nl">184:</span>	<span class="mh">bf 93 </span>      	<span class="nf">push</span>	<span class="no">r27</span>
+ <span class="nl">186:</span>	<span class="mh">80 91 05 01 </span>	<span class="nf">lds</span>	<span class="no">r24</span><span class="p">,</span> <span class="mi">0x0105</span>	<span class="err">;</span> <span class="mh">0x800105</span> <span class="p">&lt;</span><span class="no">timer0_millis</span><span class="p">&gt;</span>
+ <span class="nl">18a:</span>	<span class="mh">90 91 06 01 </span>	<span class="nf">lds</span>	<span class="no">r25</span><span class="p">,</span> <span class="mi">0x0106</span>	<span class="err">;</span> <span class="mh">0x800106</span> <span class="p">&lt;</span><span class="no">timer0_millis</span><span class="p">+</span><span class="mi">0x1</span><span class="p">&gt;</span>
+ <span class="nl">18e:</span>	<span class="mh">a0 91 07 01 </span>	<span class="nf">lds</span>	<span class="no">r26</span><span class="p">,</span> <span class="mi">0x0107</span>	<span class="err">;</span> <span class="mh">0x800107</span> <span class="p">&lt;</span><span class="no">timer0_millis</span><span class="p">+</span><span class="mi">0x2</span><span class="p">&gt;</span>
+ <span class="nl">192:</span>	<span class="mh">b0 91 08 01 </span>	<span class="nf">lds</span>	<span class="no">r27</span><span class="p">,</span> <span class="mi">0x0108</span>	<span class="err">;</span> <span class="mh">0x800108</span> <span class="p">&lt;</span><span class="no">timer0_millis</span><span class="p">+</span><span class="mi">0x3</span><span class="p">&gt;</span>
+ <span class="nl">196:</span>	<span class="mh">30 91 04 01 </span>	<span class="nf">lds</span>	<span class="no">r19</span><span class="p">,</span> <span class="mi">0x0104</span>	<span class="err">;</span> <span class="mh">0x800104</span> <span class="p">&lt;</span><span class="no">timer0_fract</span><span class="p">&gt;</span>
+ <span class="nl">19a:</span>	<span class="mh">23 e0 </span>      	<span class="nf">ldi</span>	<span class="no">r18</span><span class="p">,</span> <span class="mi">0x03</span>	<span class="err">;</span> <span class="mi">3</span>
+ <span class="nl">19c:</span>	<span class="mh">23 0f </span>      	<span class="nf">add</span>	<span class="no">r18</span><span class="p">,</span> <span class="no">r19</span>
+ <span class="nl">19e:</span>	<span class="mh">2d 37 </span>      	<span class="nf">cpi</span>	<span class="no">r18</span><span class="p">,</span> <span class="mi">0x7D</span>	<span class="err">;</span> <span class="mi">125</span>
+ <span class="nl">1a0:</span>	<span class="mh">58 f5 </span>      	<span class="nf">brcc</span>	<span class="p">.</span><span class="err">+</span><span class="mi">86</span>     	<span class="err">;</span> <span class="mh">0x1f8</span> <span class="p">&lt;</span><span class="no">__vector_16</span><span class="p">+</span><span class="mi">0x88</span><span class="p">&gt;</span>
+ <span class="nl">1a2:</span>	<span class="mh">01 96 </span>      	<span class="nf">adiw</span>	<span class="no">r24</span><span class="p">,</span> <span class="mi">0x01</span>	<span class="err">;</span> <span class="mi">1</span>
+ <span class="nl">1a4:</span>	<span class="mh">a1 1d </span>      	<span class="nf">adc</span>	<span class="no">r26</span><span class="p">,</span> <span class="no">r1</span>
+ <span class="nl">1a6:</span>	<span class="mh">b1 1d </span>      	<span class="nf">adc</span>	<span class="no">r27</span><span class="p">,</span> <span class="no">r1</span>
+ <span class="nl">1a8:</span>	<span class="mh">20 93 04 01 </span>	<span class="nf">sts</span>	<span class="mi">0x0104</span><span class="p">,</span> <span class="no">r18</span>	<span class="err">;</span> <span class="mh">0x800104</span> <span class="p">&lt;</span><span class="no">timer0_fract</span><span class="p">&gt;</span>
+ <span class="nl">1ac:</span>	<span class="mh">80 93 05 01 </span>	<span class="nf">sts</span>	<span class="mi">0x0105</span><span class="p">,</span> <span class="no">r24</span>	<span class="err">;</span> <span class="mh">0x800105</span> <span class="p">&lt;</span><span class="no">timer0_millis</span><span class="p">&gt;</span>
+ <span class="nl">1b0:</span>	<span class="mh">90 93 06 01 </span>	<span class="nf">sts</span>	<span class="mi">0x0106</span><span class="p">,</span> <span class="no">r25</span>	<span class="err">;</span> <span class="mh">0x800106</span> <span class="p">&lt;</span><span class="no">timer0_millis</span><span class="p">+</span><span class="mi">0x1</span><span class="p">&gt;</span>
+ <span class="nl">1b4:</span>	<span class="mh">a0 93 07 01 </span>	<span class="nf">sts</span>	<span class="mi">0x0107</span><span class="p">,</span> <span class="no">r26</span>	<span class="err">;</span> <span class="mh">0x800107</span> <span class="p">&lt;</span><span class="no">timer0_millis</span><span class="p">+</span><span class="mi">0x2</span><span class="p">&gt;</span>
+ <span class="nl">1b8:</span>	<span class="mh">b0 93 08 01 </span>	<span class="nf">sts</span>	<span class="mi">0x0108</span><span class="p">,</span> <span class="no">r27</span>	<span class="err">;</span> <span class="mh">0x800108</span> <span class="p">&lt;</span><span class="no">timer0_millis</span><span class="p">+</span><span class="mi">0x3</span><span class="p">&gt;</span>
+ <span class="nl">1bc:</span>	<span class="mh">80 91 00 01 </span>	<span class="nf">lds</span>	<span class="no">r24</span><span class="p">,</span> <span class="mi">0x0100</span>	<span class="err">;</span> <span class="mh">0x800100</span> <span class="p">&lt;</span><span class="no">_edata</span><span class="p">&gt;</span>
+ <span class="nl">1c0:</span>	<span class="mh">90 91 01 01 </span>	<span class="nf">lds</span>	<span class="no">r25</span><span class="p">,</span> <span class="mi">0x0101</span>	<span class="err">;</span> <span class="mh">0x800101</span> <span class="p">&lt;</span><span class="no">_edata</span><span class="p">+</span><span class="mi">0x1</span><span class="p">&gt;</span>
+ <span class="nl">1c4:</span>	<span class="mh">a0 91 02 01 </span>	<span class="nf">lds</span>	<span class="no">r26</span><span class="p">,</span> <span class="mi">0x0102</span>	<span class="err">;</span> <span class="mh">0x800102</span> <span class="p">&lt;</span><span class="no">_edata</span><span class="p">+</span><span class="mi">0x2</span><span class="p">&gt;</span>
+ <span class="nl">1c8:</span>	<span class="mh">b0 91 03 01 </span>	<span class="nf">lds</span>	<span class="no">r27</span><span class="p">,</span> <span class="mi">0x0103</span>	<span class="err">;</span> <span class="mh">0x800103</span> <span class="p">&lt;</span><span class="no">_edata</span><span class="p">+</span><span class="mi">0x3</span><span class="p">&gt;</span>
+ <span class="nl">1cc:</span>	<span class="mh">01 96 </span>      	<span class="nf">adiw</span>	<span class="no">r24</span><span class="p">,</span> <span class="mi">0x01</span>	<span class="err">;</span> <span class="mi">1</span>
+ <span class="nl">1ce:</span>	<span class="mh">a1 1d </span>      	<span class="nf">adc</span>	<span class="no">r26</span><span class="p">,</span> <span class="no">r1</span>
+ <span class="nl">1d0:</span>	<span class="mh">b1 1d </span>      	<span class="nf">adc</span>	<span class="no">r27</span><span class="p">,</span> <span class="no">r1</span>
+ <span class="nl">1d2:</span>	<span class="mh">80 93 00 01 </span>	<span class="nf">sts</span>	<span class="mi">0x0100</span><span class="p">,</span> <span class="no">r24</span>	<span class="err">;</span> <span class="mh">0x800100</span> <span class="p">&lt;</span><span class="no">_edata</span><span class="p">&gt;</span>
+ <span class="nl">1d6:</span>	<span class="mh">90 93 01 01 </span>	<span class="nf">sts</span>	<span class="mi">0x0101</span><span class="p">,</span> <span class="no">r25</span>	<span class="err">;</span> <span class="mh">0x800101</span> <span class="p">&lt;</span><span class="no">_edata</span><span class="p">+</span><span class="mi">0x1</span><span class="p">&gt;</span>
+ <span class="nl">1da:</span>	<span class="mh">a0 93 02 01 </span>	<span class="nf">sts</span>	<span class="mi">0x0102</span><span class="p">,</span> <span class="no">r26</span>	<span class="err">;</span> <span class="mh">0x800102</span> <span class="p">&lt;</span><span class="no">_edata</span><span class="p">+</span><span class="mi">0x2</span><span class="p">&gt;</span>
+ <span class="nl">1de:</span>	<span class="mh">b0 93 03 01 </span>	<span class="nf">sts</span>	<span class="mi">0x0103</span><span class="p">,</span> <span class="no">r27</span>	<span class="err">;</span> <span class="mh">0x800103</span> <span class="p">&lt;</span><span class="no">_edata</span><span class="p">+</span><span class="mi">0x3</span><span class="p">&gt;</span>
+ <span class="nl">1e2:</span>	<span class="mh">bf 91 </span>      	<span class="nf">pop</span>	<span class="no">r27</span>
+ <span class="nl">1e4:</span>	<span class="mh">af 91 </span>      	<span class="nf">pop</span>	<span class="no">r26</span>
+ <span class="nl">1e6:</span>	<span class="mh">9f 91 </span>      	<span class="nf">pop</span>	<span class="no">r25</span>
+ <span class="nl">1e8:</span>	<span class="mh">8f 91 </span>      	<span class="nf">pop</span>	<span class="no">r24</span>
+ <span class="nl">1ea:</span>	<span class="mh">3f 91 </span>      	<span class="nf">pop</span>	<span class="no">r19</span>
+ <span class="nl">1ec:</span>	<span class="mh">2f 91 </span>      	<span class="nf">pop</span>	<span class="no">r18</span>
+ <span class="nl">1ee:</span>	<span class="mh">0f 90 </span>      	<span class="nf">pop</span>	<span class="no">r0</span>
+ <span class="nl">1f0:</span>	<span class="mh">0f be </span>      	<span class="nf">out</span>	<span class="mi">0x3f</span><span class="p">,</span> <span class="no">r0</span>	<span class="err">;</span> <span class="mi">63</span>
+ <span class="nl">1f2:</span>	<span class="mh">0f 90 </span>      	<span class="nf">pop</span>	<span class="no">r0</span>
+ <span class="nl">1f4:</span>	<span class="mh">1f 90 </span>      	<span class="nf">pop</span>	<span class="no">r1</span>
+ <span class="nl">1f6:</span>	<span class="mh">18 95 </span>      	<span class="nf">reti</span>
+ <span class="nl">1f8:</span>	<span class="mh">26 e8 </span>      	<span class="nf">ldi</span>	<span class="no">r18</span><span class="p">,</span> <span class="mi">0x86</span>	<span class="err">;</span> <span class="mi">134</span>
+ <span class="nl">1fa:</span>	<span class="mh">23 0f </span>      	<span class="nf">add</span>	<span class="no">r18</span><span class="p">,</span> <span class="no">r19</span>
+ <span class="nl">1fc:</span>	<span class="mh">02 96 </span>      	<span class="nf">adiw</span>	<span class="no">r24</span><span class="p">,</span> <span class="mi">0x02</span>	<span class="err">;</span> <span class="mi">2</span>
+ <span class="nl">1fe:</span>	<span class="mh">a1 1d </span>      	<span class="nf">adc</span>	<span class="no">r26</span><span class="p">,</span> <span class="no">r1</span>
+ <span class="nl">200:</span>	<span class="mh">b1 1d </span>      	<span class="nf">adc</span>	<span class="no">r27</span><span class="p">,</span> <span class="no">r1</span>
+ <span class="nl">202:</span>	<span class="mh">d2 cf </span>      	<span class="nf">rjmp</span>	<span class="no">.-92</span>     	<span class="err">;</span> <span class="mh">0x1a8</span> <span class="p">&lt;</span><span class="no">__vector_16</span><span class="p">+</span><span class="mi">0x38</span><span class="p">&gt;</span>
+
+<span class="mh">00000204</span> <span class="p">&lt;</span><span class="nf">main</span><span class="p">&gt;:</span>
+ <span class="nl">204:</span>	<span class="mh">78 94 </span>      	<span class="nf">sei</span>
+ <span class="nl">206:</span>	<span class="mh">84 b5 </span>      	<span class="nf">in</span>	<span class="no">r24</span><span class="p">,</span> <span class="mi">0x24</span>	<span class="err">;</span> <span class="mi">36</span>
+ <span class="nl">208:</span>	<span class="mh">82 60 </span>      	<span class="nf">ori</span>	<span class="no">r24</span><span class="p">,</span> <span class="mi">0x02</span>	<span class="err">;</span> <span class="mi">2</span>
+ <span class="nl">20a:</span>	<span class="mh">84 bd </span>      	<span class="nf">out</span>	<span class="mi">0x24</span><span class="p">,</span> <span class="no">r24</span>	<span class="err">;</span> <span class="mi">36</span>
+ <span class="nl">20c:</span>	<span class="mh">84 b5 </span>      	<span class="nf">in</span>	<span class="no">r24</span><span class="p">,</span> <span class="mi">0x24</span>	<span class="err">;</span> <span class="mi">36</span>
+ <span class="nl">20e:</span>	<span class="mh">81 60 </span>      	<span class="nf">ori</span>	<span class="no">r24</span><span class="p">,</span> <span class="mi">0x01</span>	<span class="err">;</span> <span class="mi">1</span>
+ <span class="nl">210:</span>	<span class="mh">84 bd </span>      	<span class="nf">out</span>	<span class="mi">0x24</span><span class="p">,</span> <span class="no">r24</span>	<span class="err">;</span> <span class="mi">36</span>
+ <span class="nl">212:</span>	<span class="mh">85 b5 </span>      	<span class="nf">in</span>	<span class="no">r24</span><span class="p">,</span> <span class="mi">0x25</span>	<span class="err">;</span> <span class="mi">37</span>
+ <span class="nl">214:</span>	<span class="mh">82 60 </span>      	<span class="nf">ori</span>	<span class="no">r24</span><span class="p">,</span> <span class="mi">0x02</span>	<span class="err">;</span> <span class="mi">2</span>
+ <span class="nl">216:</span>	<span class="mh">85 bd </span>      	<span class="nf">out</span>	<span class="mi">0x25</span><span class="p">,</span> <span class="no">r24</span>	<span class="err">;</span> <span class="mi">37</span>
+ <span class="nl">218:</span>	<span class="mh">85 b5 </span>      	<span class="nf">in</span>	<span class="no">r24</span><span class="p">,</span> <span class="mi">0x25</span>	<span class="err">;</span> <span class="mi">37</span>
+ <span class="nl">21a:</span>	<span class="mh">81 60 </span>      	<span class="nf">ori</span>	<span class="no">r24</span><span class="p">,</span> <span class="mi">0x01</span>	<span class="err">;</span> <span class="mi">1</span>
+ <span class="nl">21c:</span>	<span class="mh">85 bd </span>      	<span class="nf">out</span>	<span class="mi">0x25</span><span class="p">,</span> <span class="no">r24</span>	<span class="err">;</span> <span class="mi">37</span>
+ <span class="nl">21e:</span>	<span class="mh">80 91 6e 00 </span>	<span class="nf">lds</span>	<span class="no">r24</span><span class="p">,</span> <span class="mi">0x006E</span>	<span class="err">;</span> <span class="mh">0x80006e</span> <span class="p">&lt;</span><span class="no">__TEXT_REGION_LENGTH__</span><span class="p">+</span><span class="mi">0x7e006e</span><span class="p">&gt;</span>
+ <span class="nl">222:</span>	<span class="mh">81 60 </span>      	<span class="nf">ori</span>	<span class="no">r24</span><span class="p">,</span> <span class="mi">0x01</span>	<span class="err">;</span> <span class="mi">1</span>
+ <span class="nl">224:</span>	<span class="mh">80 93 6e 00 </span>	<span class="nf">sts</span>	<span class="mi">0x006E</span><span class="p">,</span> <span class="no">r24</span>	<span class="err">;</span> <span class="mh">0x80006e</span> <span class="p">&lt;</span><span class="no">__TEXT_REGION_LENGTH__</span><span class="p">+</span><span class="mi">0x7e006e</span><span class="p">&gt;</span>
+ <span class="nl">228:</span>	<span class="mh">10 92 81 00 </span>	<span class="nf">sts</span>	<span class="mi">0x0081</span><span class="p">,</span> <span class="no">r1</span>	<span class="err">;</span> <span class="mh">0x800081</span> <span class="p">&lt;</span><span class="no">__TEXT_REGION_LENGTH__</span><span class="p">+</span><span class="mi">0x7e0081</span><span class="p">&gt;</span>
+ <span class="nl">22c:</span>	<span class="mh">80 91 81 00 </span>	<span class="nf">lds</span>	<span class="no">r24</span><span class="p">,</span> <span class="mi">0x0081</span>	<span class="err">;</span> <span class="mh">0x800081</span> <span class="p">&lt;</span><span class="no">__TEXT_REGION_LENGTH__</span><span class="p">+</span><span class="mi">0x7e0081</span><span class="p">&gt;</span>
+ <span class="nl">230:</span>	<span class="mh">82 60 </span>      	<span class="nf">ori</span>	<span class="no">r24</span><span class="p">,</span> <span class="mi">0x02</span>	<span class="err">;</span> <span class="mi">2</span>
+ <span class="nl">232:</span>	<span class="mh">80 93 81 00 </span>	<span class="nf">sts</span>	<span class="mi">0x0081</span><span class="p">,</span> <span class="no">r24</span>	<span class="err">;</span> <span class="mh">0x800081</span> <span class="p">&lt;</span><span class="no">__TEXT_REGION_LENGTH__</span><span class="p">+</span><span class="mi">0x7e0081</span><span class="p">&gt;</span>
+ <span class="nl">236:</span>	<span class="mh">80 91 81 00 </span>	<span class="nf">lds</span>	<span class="no">r24</span><span class="p">,</span> <span class="mi">0x0081</span>	<span class="err">;</span> <span class="mh">0x800081</span> <span class="p">&lt;</span><span class="no">__TEXT_REGION_LENGTH__</span><span class="p">+</span><span class="mi">0x7e0081</span><span class="p">&gt;</span>
+ <span class="nl">23a:</span>	<span class="mh">81 60 </span>      	<span class="nf">ori</span>	<span class="no">r24</span><span class="p">,</span> <span class="mi">0x01</span>	<span class="err">;</span> <span class="mi">1</span>
+ <span class="nl">23c:</span>	<span class="mh">80 93 81 00 </span>	<span class="nf">sts</span>	<span class="mi">0x0081</span><span class="p">,</span> <span class="no">r24</span>	<span class="err">;</span> <span class="mh">0x800081</span> <span class="p">&lt;</span><span class="no">__TEXT_REGION_LENGTH__</span><span class="p">+</span><span class="mi">0x7e0081</span><span class="p">&gt;</span>
+ <span class="nl">240:</span>	<span class="mh">80 91 80 00 </span>	<span class="nf">lds</span>	<span class="no">r24</span><span class="p">,</span> <span class="mi">0x0080</span>	<span class="err">;</span> <span class="mh">0x800080</span> <span class="p">&lt;</span><span class="no">__TEXT_REGION_LENGTH__</span><span class="p">+</span><span class="mi">0x7e0080</span><span class="p">&gt;</span>
+ <span class="nl">244:</span>	<span class="mh">81 60 </span>      	<span class="nf">ori</span>	<span class="no">r24</span><span class="p">,</span> <span class="mi">0x01</span>	<span class="err">;</span> <span class="mi">1</span>
+ <span class="nl">246:</span>	<span class="mh">80 93 80 00 </span>	<span class="nf">sts</span>	<span class="mi">0x0080</span><span class="p">,</span> <span class="no">r24</span>	<span class="err">;</span> <span class="mh">0x800080</span> <span class="p">&lt;</span><span class="no">__TEXT_REGION_LENGTH__</span><span class="p">+</span><span class="mi">0x7e0080</span><span class="p">&gt;</span>
+ <span class="nl">24a:</span>	<span class="mh">80 91 b1 00 </span>	<span class="nf">lds</span>	<span class="no">r24</span><span class="p">,</span> <span class="mi">0x00B1</span>	<span class="err">;</span> <span class="mh">0x8000b1</span> <span class="p">&lt;</span><span class="no">__TEXT_REGION_LENGTH__</span><span class="p">+</span><span class="mi">0x7e00b1</span><span class="p">&gt;</span>
+ <span class="nl">24e:</span>	<span class="mh">84 60 </span>      	<span class="nf">ori</span>	<span class="no">r24</span><span class="p">,</span> <span class="mi">0x04</span>	<span class="err">;</span> <span class="mi">4</span>
+ <span class="nl">250:</span>	<span class="mh">80 93 b1 00 </span>	<span class="nf">sts</span>	<span class="mi">0x00B1</span><span class="p">,</span> <span class="no">r24</span>	<span class="err">;</span> <span class="mh">0x8000b1</span> <span class="p">&lt;</span><span class="no">__TEXT_REGION_LENGTH__</span><span class="p">+</span><span class="mi">0x7e00b1</span><span class="p">&gt;</span>
+ <span class="nl">254:</span>	<span class="mh">80 91 b0 00 </span>	<span class="nf">lds</span>	<span class="no">r24</span><span class="p">,</span> <span class="mi">0x00B0</span>	<span class="err">;</span> <span class="mh">0x8000b0</span> <span class="p">&lt;</span><span class="no">__TEXT_REGION_LENGTH__</span><span class="p">+</span><span class="mi">0x7e00b0</span><span class="p">&gt;</span>
+ <span class="nl">258:</span>	<span class="mh">81 60 </span>      	<span class="nf">ori</span>	<span class="no">r24</span><span class="p">,</span> <span class="mi">0x01</span>	<span class="err">;</span> <span class="mi">1</span>
+ <span class="nl">25a:</span>	<span class="mh">80 93 b0 00 </span>	<span class="nf">sts</span>	<span class="mi">0x00B0</span><span class="p">,</span> <span class="no">r24</span>	<span class="err">;</span> <span class="mh">0x8000b0</span> <span class="p">&lt;</span><span class="no">__TEXT_REGION_LENGTH__</span><span class="p">+</span><span class="mi">0x7e00b0</span><span class="p">&gt;</span>
+ <span class="nl">25e:</span>	<span class="mh">80 91 7a 00 </span>	<span class="nf">lds</span>	<span class="no">r24</span><span class="p">,</span> <span class="mi">0x007A</span>	<span class="err">;</span> <span class="mh">0x80007a</span> <span class="p">&lt;</span><span class="no">__TEXT_REGION_LENGTH__</span><span class="p">+</span><span class="mi">0x7e007a</span><span class="p">&gt;</span>
+ <span class="nl">262:</span>	<span class="mh">84 60 </span>      	<span class="nf">ori</span>	<span class="no">r24</span><span class="p">,</span> <span class="mi">0x04</span>	<span class="err">;</span> <span class="mi">4</span>
+ <span class="nl">264:</span>	<span class="mh">80 93 7a 00 </span>	<span class="nf">sts</span>	<span class="mi">0x007A</span><span class="p">,</span> <span class="no">r24</span>	<span class="err">;</span> <span class="mh">0x80007a</span> <span class="p">&lt;</span><span class="no">__TEXT_REGION_LENGTH__</span><span class="p">+</span><span class="mi">0x7e007a</span><span class="p">&gt;</span>
+ <span class="nl">268:</span>	<span class="mh">80 91 7a 00 </span>	<span class="nf">lds</span>	<span class="no">r24</span><span class="p">,</span> <span class="mi">0x007A</span>	<span class="err">;</span> <span class="mh">0x80007a</span> <span class="p">&lt;</span><span class="no">__TEXT_REGION_LENGTH__</span><span class="p">+</span><span class="mi">0x7e007a</span><span class="p">&gt;</span>
+ <span class="nl">26c:</span>	<span class="mh">82 60 </span>      	<span class="nf">ori</span>	<span class="no">r24</span><span class="p">,</span> <span class="mi">0x02</span>	<span class="err">;</span> <span class="mi">2</span>
+ <span class="nl">26e:</span>	<span class="mh">80 93 7a 00 </span>	<span class="nf">sts</span>	<span class="mi">0x007A</span><span class="p">,</span> <span class="no">r24</span>	<span class="err">;</span> <span class="mh">0x80007a</span> <span class="p">&lt;</span><span class="no">__TEXT_REGION_LENGTH__</span><span class="p">+</span><span class="mi">0x7e007a</span><span class="p">&gt;</span>
+ <span class="nl">272:</span>	<span class="mh">80 91 7a 00 </span>	<span class="nf">lds</span>	<span class="no">r24</span><span class="p">,</span> <span class="mi">0x007A</span>	<span class="err">;</span> <span class="mh">0x80007a</span> <span class="p">&lt;</span><span class="no">__TEXT_REGION_LENGTH__</span><span class="p">+</span><span class="mi">0x7e007a</span><span class="p">&gt;</span>
+ <span class="nl">276:</span>	<span class="mh">81 60 </span>      	<span class="nf">ori</span>	<span class="no">r24</span><span class="p">,</span> <span class="mi">0x01</span>	<span class="err">;</span> <span class="mi">1</span>
+ <span class="nl">278:</span>	<span class="mh">80 93 7a 00 </span>	<span class="nf">sts</span>	<span class="mi">0x007A</span><span class="p">,</span> <span class="no">r24</span>	<span class="err">;</span> <span class="mh">0x80007a</span> <span class="p">&lt;</span><span class="no">__TEXT_REGION_LENGTH__</span><span class="p">+</span><span class="mi">0x7e007a</span><span class="p">&gt;</span>
+ <span class="nl">27c:</span>	<span class="mh">80 91 7a 00 </span>	<span class="nf">lds</span>	<span class="no">r24</span><span class="p">,</span> <span class="mi">0x007A</span>	<span class="err">;</span> <span class="mh">0x80007a</span> <span class="p">&lt;</span><span class="no">__TEXT_REGION_LENGTH__</span><span class="p">+</span><span class="mi">0x7e007a</span><span class="p">&gt;</span>
+ <span class="nl">280:</span>	<span class="mh">80 68 </span>      	<span class="nf">ori</span>	<span class="no">r24</span><span class="p">,</span> <span class="mi">0x80</span>	<span class="err">;</span> <span class="mi">128</span>
+ <span class="nl">282:</span>	<span class="mh">80 93 7a 00 </span>	<span class="nf">sts</span>	<span class="mi">0x007A</span><span class="p">,</span> <span class="no">r24</span>	<span class="err">;</span> <span class="mh">0x80007a</span> <span class="p">&lt;</span><span class="no">__TEXT_REGION_LENGTH__</span><span class="p">+</span><span class="mi">0x7e007a</span><span class="p">&gt;</span>
+ <span class="nl">286:</span>	<span class="mh">10 92 c1 00 </span>	<span class="nf">sts</span>	<span class="mi">0x00C1</span><span class="p">,</span> <span class="no">r1</span>	<span class="err">;</span> <span class="mh">0x8000c1</span> <span class="p">&lt;</span><span class="no">__TEXT_REGION_LENGTH__</span><span class="p">+</span><span class="mi">0x7e00c1</span><span class="p">&gt;</span>
+ <span class="nl">28a:</span>	<span class="mh">ed e9 </span>      	<span class="nf">ldi</span>	<span class="no">r30</span><span class="p">,</span> <span class="mi">0x9D</span>	<span class="err">;</span> <span class="mi">157</span>
+ <span class="nl">28c:</span>	<span class="mh">f0 e0 </span>      	<span class="nf">ldi</span>	<span class="no">r31</span><span class="p">,</span> <span class="mi">0x00</span>	<span class="err">;</span> <span class="mi">0</span>
+ <span class="nl">28e:</span>	<span class="mh">24 91 </span>      	<span class="nf">lpm</span>	<span class="no">r18</span><span class="p">,</span> <span class="no">Z</span>
+ <span class="nl">290:</span>	<span class="mh">e9 e8 </span>      	<span class="nf">ldi</span>	<span class="no">r30</span><span class="p">,</span> <span class="mi">0x89</span>	<span class="err">;</span> <span class="mi">137</span>
+ <span class="nl">292:</span>	<span class="mh">f0 e0 </span>      	<span class="nf">ldi</span>	<span class="no">r31</span><span class="p">,</span> <span class="mi">0x00</span>	<span class="err">;</span> <span class="mi">0</span>
+ <span class="nl">294:</span>	<span class="mh">84 91 </span>      	<span class="nf">lpm</span>	<span class="no">r24</span><span class="p">,</span> <span class="no">Z</span>
+ <span class="nl">296:</span>	<span class="mh">88 23 </span>      	<span class="nf">and</span>	<span class="no">r24</span><span class="p">,</span> <span class="no">r24</span>
+ <span class="nl">298:</span>	<span class="mh">99 f0 </span>      	<span class="nf">breq</span>	<span class="p">.</span><span class="err">+</span><span class="mi">38</span>     	<span class="err">;</span> <span class="mh">0x2c0</span> <span class="p">&lt;</span><span class="no">main</span><span class="p">+</span><span class="mi">0xbc</span><span class="p">&gt;</span>
+ <span class="nl">29a:</span>	<span class="mh">90 e0 </span>      	<span class="nf">ldi</span>	<span class="no">r25</span><span class="p">,</span> <span class="mi">0x00</span>	<span class="err">;</span> <span class="mi">0</span>
+ <span class="nl">29c:</span>	<span class="mh">88 0f </span>      	<span class="nf">add</span>	<span class="no">r24</span><span class="p">,</span> <span class="no">r24</span>
+ <span class="nl">29e:</span>	<span class="mh">99 1f </span>      	<span class="nf">adc</span>	<span class="no">r25</span><span class="p">,</span> <span class="no">r25</span>
+ <span class="nl">2a0:</span>	<span class="mh">fc 01 </span>      	<span class="nf">movw</span>	<span class="no">r30</span><span class="p">,</span> <span class="no">r24</span>
+ <span class="nl">2a2:</span>	<span class="mh">e8 59 </span>      	<span class="nf">subi</span>	<span class="no">r30</span><span class="p">,</span> <span class="mi">0x98</span>	<span class="err">;</span> <span class="mi">152</span>
+ <span class="nl">2a4:</span>	<span class="mh">ff 4f </span>      	<span class="nf">sbci</span>	<span class="no">r31</span><span class="p">,</span> <span class="mi">0xFF</span>	<span class="err">;</span> <span class="mi">255</span>
+ <span class="nl">2a6:</span>	<span class="mh">a5 91 </span>      	<span class="nf">lpm</span>	<span class="no">r26</span><span class="p">,</span> <span class="no">Z</span><span class="err">+</span>
+ <span class="nl">2a8:</span>	<span class="mh">b4 91 </span>      	<span class="nf">lpm</span>	<span class="no">r27</span><span class="p">,</span> <span class="no">Z</span>
+ <span class="nl">2aa:</span>	<span class="mh">fc 01 </span>      	<span class="nf">movw</span>	<span class="no">r30</span><span class="p">,</span> <span class="no">r24</span>
+ <span class="nl">2ac:</span>	<span class="mh">ee 58 </span>      	<span class="nf">subi</span>	<span class="no">r30</span><span class="p">,</span> <span class="mi">0x8E</span>	<span class="err">;</span> <span class="mi">142</span>
+ <span class="nl">2ae:</span>	<span class="mh">ff 4f </span>      	<span class="nf">sbci</span>	<span class="no">r31</span><span class="p">,</span> <span class="mi">0xFF</span>	<span class="err">;</span> <span class="mi">255</span>
+ <span class="nl">2b0:</span>	<span class="mh">85 91 </span>      	<span class="nf">lpm</span>	<span class="no">r24</span><span class="p">,</span> <span class="no">Z</span><span class="err">+</span>
+ <span class="nl">2b2:</span>	<span class="mh">94 91 </span>      	<span class="nf">lpm</span>	<span class="no">r25</span><span class="p">,</span> <span class="no">Z</span>
+ <span class="nl">2b4:</span>	<span class="mh">8f b7 </span>      	<span class="nf">in</span>	<span class="no">r24</span><span class="p">,</span> <span class="mi">0x3f</span>	<span class="err">;</span> <span class="mi">63</span>
+ <span class="nl">2b6:</span>	<span class="mh">f8 94 </span>      	<span class="nf">cli</span>
+ <span class="nl">2b8:</span>	<span class="mh">ec 91 </span>      	<span class="nf">ld</span>	<span class="no">r30</span><span class="p">,</span> <span class="no">X</span>
+ <span class="nl">2ba:</span>	<span class="mh">e2 2b </span>      	<span class="nf">or</span>	<span class="no">r30</span><span class="p">,</span> <span class="no">r18</span>
+ <span class="nl">2bc:</span>	<span class="mh">ec 93 </span>      	<span class="nf">st</span>	<span class="no">X</span><span class="p">,</span> <span class="no">r30</span>
+ <span class="nl">2be:</span>	<span class="mh">8f bf </span>      	<span class="nf">out</span>	<span class="mi">0x3f</span><span class="p">,</span> <span class="no">r24</span>	<span class="err">;</span> <span class="mi">63</span>
+ <span class="nl">2c0:</span>	<span class="mh">c0 e0 </span>      	<span class="nf">ldi</span>	<span class="no">r28</span><span class="p">,</span> <span class="mi">0x00</span>	<span class="err">;</span> <span class="mi">0</span>
+ <span class="nl">2c2:</span>	<span class="mh">d0 e0 </span>      	<span class="nf">ldi</span>	<span class="no">r29</span><span class="p">,</span> <span class="mi">0x00</span>	<span class="err">;</span> <span class="mi">0</span>
+ <span class="nl">2c4:</span>	<span class="mh">81 e0 </span>      	<span class="nf">ldi</span>	<span class="no">r24</span><span class="p">,</span> <span class="mi">0x01</span>	<span class="err">;</span> <span class="mi">1</span>
+ <span class="nl">2c6:</span>	<span class="mh">0e 94 70 00 </span>	<span class="nf">call</span>	<span class="mi">0xe0</span>	<span class="err">;</span> <span class="mh">0xe0</span> <span class="p">&lt;</span><span class="no">digitalWrite.constprop.0</span><span class="p">&gt;</span>
+ <span class="nl">2ca:</span>	<span class="mh">80 e0 </span>      	<span class="nf">ldi</span>	<span class="no">r24</span><span class="p">,</span> <span class="mi">0x00</span>	<span class="err">;</span> <span class="mi">0</span>
+ <span class="nl">2cc:</span>	<span class="mh">0e 94 70 00 </span>	<span class="nf">call</span>	<span class="mi">0xe0</span>	<span class="err">;</span> <span class="mh">0xe0</span> <span class="p">&lt;</span><span class="no">digitalWrite.constprop.0</span><span class="p">&gt;</span>
+ <span class="nl">2d0:</span>	<span class="mh">20 97 </span>      	<span class="nf">sbiw</span>	<span class="no">r28</span><span class="p">,</span> <span class="mi">0x00</span>	<span class="err">;</span> <span class="mi">0</span>
+ <span class="nl">2d2:</span>	<span class="mh">c1 f3 </span>      	<span class="nf">breq</span>	<span class="no">.-16</span>     	<span class="err">;</span> <span class="mh">0x2c4</span> <span class="p">&lt;</span><span class="no">main</span><span class="p">+</span><span class="mi">0xc0</span><span class="p">&gt;</span>
+ <span class="nl">2d4:</span>	<span class="mh">0e 94 00 00 </span>	<span class="nf">call</span>	<span class="mi">0</span>	<span class="err">;</span> <span class="mh">0x0</span> <span class="p">&lt;</span><span class="no">__vectors</span><span class="p">&gt;</span>
+ <span class="nl">2d8:</span>	<span class="mh">f5 cf </span>      	<span class="nf">rjmp</span>	<span class="no">.-22</span>     	<span class="err">;</span> <span class="mh">0x2c4</span> <span class="p">&lt;</span><span class="no">main</span><span class="p">+</span><span class="mi">0xc0</span><span class="p">&gt;</span>
+
+<span class="mh">000002da</span> <span class="p">&lt;</span><span class="nf">_exit</span><span class="p">&gt;:</span>
+ <span class="nl">2da:</span>	<span class="mh">f8 94 </span>      	<span class="nf">cli</span>
+
+<span class="mh">000002dc</span> <span class="p">&lt;</span><span class="nf">__stop_program</span><span class="p">&gt;:</span>
+ <span class="nl">2dc:</span>	<span class="mh">ff cf </span>      	<span class="nf">rjmp</span>	<span class="no">.-2</span>      	<span class="err">;</span> <span class="mh">0x2dc</span> <span class="p">&lt;</span><span class="no">__stop_program</span><span class="p">&gt;</span>
+</pre></div>
+
+       
+      <hr />
+      
+      <h2>
+        <a href="#avr" id="avr">#</a> Variant:
+        <code>avr</code> <a class="link-top" href="#toc">^</a>
+      </h2>
+      <h3>Binary size</h3>
+      <pre>
+      AVR Memory Usage
+----------------
+Device: atmega328p
+
+Program:     140 bytes (0.4% Full)
+(.text + .data + .bootloader)
+
+Data:          0 bytes (0.0% Full)
+(.data + .bss + .noinit)
+      </pre>
+      <h3>Disassembly</h3>
+      <div class="highlight"><pre><span></span><span class="nl">build/avr/firmware.elf</span><span class="p">:</span>     file format <span class="s">elf32-avr</span>
+
+
+Disassembly of section <span class="nl">.text</span><span class="p">:</span>
+
+<span class="mh">00000000</span> <span class="p">&lt;</span><span class="nf">__vectors</span><span class="p">&gt;:</span>
+   <span class="nl">0:</span>	<span class="mh">0c 94 34 00 </span>	<span class="nf">jmp</span>	<span class="mi">0x68</span>	<span class="err">;</span> <span class="mh">0x68</span> <span class="p">&lt;</span><span class="no">__ctors_end</span><span class="p">&gt;</span>
+   <span class="nl">4:</span>	<span class="mh">0c 94 3e 00 </span>	<span class="nf">jmp</span>	<span class="mi">0x7c</span>	<span class="err">;</span> <span class="mh">0x7c</span> <span class="p">&lt;</span><span class="no">__bad_interrupt</span><span class="p">&gt;</span>
+   <span class="nl">8:</span>	<span class="mh">0c 94 3e 00 </span>	<span class="nf">jmp</span>	<span class="mi">0x7c</span>	<span class="err">;</span> <span class="mh">0x7c</span> <span class="p">&lt;</span><span class="no">__bad_interrupt</span><span class="p">&gt;</span>
+   <span class="nl">c:</span>	<span class="mh">0c 94 3e 00 </span>	<span class="nf">jmp</span>	<span class="mi">0x7c</span>	<span class="err">;</span> <span class="mh">0x7c</span> <span class="p">&lt;</span><span class="no">__bad_interrupt</span><span class="p">&gt;</span>
+  <span class="nl">10:</span>	<span class="mh">0c 94 3e 00 </span>	<span class="nf">jmp</span>	<span class="mi">0x7c</span>	<span class="err">;</span> <span class="mh">0x7c</span> <span class="p">&lt;</span><span class="no">__bad_interrupt</span><span class="p">&gt;</span>
+  <span class="nl">14:</span>	<span class="mh">0c 94 3e 00 </span>	<span class="nf">jmp</span>	<span class="mi">0x7c</span>	<span class="err">;</span> <span class="mh">0x7c</span> <span class="p">&lt;</span><span class="no">__bad_interrupt</span><span class="p">&gt;</span>
+  <span class="nl">18:</span>	<span class="mh">0c 94 3e 00 </span>	<span class="nf">jmp</span>	<span class="mi">0x7c</span>	<span class="err">;</span> <span class="mh">0x7c</span> <span class="p">&lt;</span><span class="no">__bad_interrupt</span><span class="p">&gt;</span>
+  <span class="nl">1c:</span>	<span class="mh">0c 94 3e 00 </span>	<span class="nf">jmp</span>	<span class="mi">0x7c</span>	<span class="err">;</span> <span class="mh">0x7c</span> <span class="p">&lt;</span><span class="no">__bad_interrupt</span><span class="p">&gt;</span>
+  <span class="nl">20:</span>	<span class="mh">0c 94 3e 00 </span>	<span class="nf">jmp</span>	<span class="mi">0x7c</span>	<span class="err">;</span> <span class="mh">0x7c</span> <span class="p">&lt;</span><span class="no">__bad_interrupt</span><span class="p">&gt;</span>
+  <span class="nl">24:</span>	<span class="mh">0c 94 3e 00 </span>	<span class="nf">jmp</span>	<span class="mi">0x7c</span>	<span class="err">;</span> <span class="mh">0x7c</span> <span class="p">&lt;</span><span class="no">__bad_interrupt</span><span class="p">&gt;</span>
+  <span class="nl">28:</span>	<span class="mh">0c 94 3e 00 </span>	<span class="nf">jmp</span>	<span class="mi">0x7c</span>	<span class="err">;</span> <span class="mh">0x7c</span> <span class="p">&lt;</span><span class="no">__bad_interrupt</span><span class="p">&gt;</span>
+  <span class="nl">2c:</span>	<span class="mh">0c 94 3e 00 </span>	<span class="nf">jmp</span>	<span class="mi">0x7c</span>	<span class="err">;</span> <span class="mh">0x7c</span> <span class="p">&lt;</span><span class="no">__bad_interrupt</span><span class="p">&gt;</span>
+  <span class="nl">30:</span>	<span class="mh">0c 94 3e 00 </span>	<span class="nf">jmp</span>	<span class="mi">0x7c</span>	<span class="err">;</span> <span class="mh">0x7c</span> <span class="p">&lt;</span><span class="no">__bad_interrupt</span><span class="p">&gt;</span>
+  <span class="nl">34:</span>	<span class="mh">0c 94 3e 00 </span>	<span class="nf">jmp</span>	<span class="mi">0x7c</span>	<span class="err">;</span> <span class="mh">0x7c</span> <span class="p">&lt;</span><span class="no">__bad_interrupt</span><span class="p">&gt;</span>
+  <span class="nl">38:</span>	<span class="mh">0c 94 3e 00 </span>	<span class="nf">jmp</span>	<span class="mi">0x7c</span>	<span class="err">;</span> <span class="mh">0x7c</span> <span class="p">&lt;</span><span class="no">__bad_interrupt</span><span class="p">&gt;</span>
+  <span class="nl">3c:</span>	<span class="mh">0c 94 3e 00 </span>	<span class="nf">jmp</span>	<span class="mi">0x7c</span>	<span class="err">;</span> <span class="mh">0x7c</span> <span class="p">&lt;</span><span class="no">__bad_interrupt</span><span class="p">&gt;</span>
+  <span class="nl">40:</span>	<span class="mh">0c 94 3e 00 </span>	<span class="nf">jmp</span>	<span class="mi">0x7c</span>	<span class="err">;</span> <span class="mh">0x7c</span> <span class="p">&lt;</span><span class="no">__bad_interrupt</span><span class="p">&gt;</span>
+  <span class="nl">44:</span>	<span class="mh">0c 94 3e 00 </span>	<span class="nf">jmp</span>	<span class="mi">0x7c</span>	<span class="err">;</span> <span class="mh">0x7c</span> <span class="p">&lt;</span><span class="no">__bad_interrupt</span><span class="p">&gt;</span>
+  <span class="nl">48:</span>	<span class="mh">0c 94 3e 00 </span>	<span class="nf">jmp</span>	<span class="mi">0x7c</span>	<span class="err">;</span> <span class="mh">0x7c</span> <span class="p">&lt;</span><span class="no">__bad_interrupt</span><span class="p">&gt;</span>
+  <span class="nl">4c:</span>	<span class="mh">0c 94 3e 00 </span>	<span class="nf">jmp</span>	<span class="mi">0x7c</span>	<span class="err">;</span> <span class="mh">0x7c</span> <span class="p">&lt;</span><span class="no">__bad_interrupt</span><span class="p">&gt;</span>
+  <span class="nl">50:</span>	<span class="mh">0c 94 3e 00 </span>	<span class="nf">jmp</span>	<span class="mi">0x7c</span>	<span class="err">;</span> <span class="mh">0x7c</span> <span class="p">&lt;</span><span class="no">__bad_interrupt</span><span class="p">&gt;</span>
+  <span class="nl">54:</span>	<span class="mh">0c 94 3e 00 </span>	<span class="nf">jmp</span>	<span class="mi">0x7c</span>	<span class="err">;</span> <span class="mh">0x7c</span> <span class="p">&lt;</span><span class="no">__bad_interrupt</span><span class="p">&gt;</span>
+  <span class="nl">58:</span>	<span class="mh">0c 94 3e 00 </span>	<span class="nf">jmp</span>	<span class="mi">0x7c</span>	<span class="err">;</span> <span class="mh">0x7c</span> <span class="p">&lt;</span><span class="no">__bad_interrupt</span><span class="p">&gt;</span>
+  <span class="nl">5c:</span>	<span class="mh">0c 94 3e 00 </span>	<span class="nf">jmp</span>	<span class="mi">0x7c</span>	<span class="err">;</span> <span class="mh">0x7c</span> <span class="p">&lt;</span><span class="no">__bad_interrupt</span><span class="p">&gt;</span>
+  <span class="nl">60:</span>	<span class="mh">0c 94 3e 00 </span>	<span class="nf">jmp</span>	<span class="mi">0x7c</span>	<span class="err">;</span> <span class="mh">0x7c</span> <span class="p">&lt;</span><span class="no">__bad_interrupt</span><span class="p">&gt;</span>
+  <span class="nl">64:</span>	<span class="mh">0c 94 3e 00 </span>	<span class="nf">jmp</span>	<span class="mi">0x7c</span>	<span class="err">;</span> <span class="mh">0x7c</span> <span class="p">&lt;</span><span class="no">__bad_interrupt</span><span class="p">&gt;</span>
+
+<span class="mh">00000068</span> <span class="p">&lt;</span><span class="nf">__ctors_end</span><span class="p">&gt;:</span>
+  <span class="nl">68:</span>	<span class="mh">11 24 </span>      	<span class="nf">eor</span>	<span class="no">r1</span><span class="p">,</span> <span class="no">r1</span>
+  <span class="nl">6a:</span>	<span class="mh">1f be </span>      	<span class="nf">out</span>	<span class="mi">0x3f</span><span class="p">,</span> <span class="no">r1</span>	<span class="err">;</span> <span class="mi">63</span>
+  <span class="nl">6c:</span>	<span class="mh">cf ef </span>      	<span class="nf">ldi</span>	<span class="no">r28</span><span class="p">,</span> <span class="mi">0xFF</span>	<span class="err">;</span> <span class="mi">255</span>
+  <span class="nl">6e:</span>	<span class="mh">d8 e0 </span>      	<span class="nf">ldi</span>	<span class="no">r29</span><span class="p">,</span> <span class="mi">0x08</span>	<span class="err">;</span> <span class="mi">8</span>
+  <span class="nl">70:</span>	<span class="mh">de bf </span>      	<span class="nf">out</span>	<span class="mi">0x3e</span><span class="p">,</span> <span class="no">r29</span>	<span class="err">;</span> <span class="mi">62</span>
+  <span class="nl">72:</span>	<span class="mh">cd bf </span>      	<span class="nf">out</span>	<span class="mi">0x3d</span><span class="p">,</span> <span class="no">r28</span>	<span class="err">;</span> <span class="mi">61</span>
+  <span class="nl">74:</span>	<span class="mh">0e 94 40 00 </span>	<span class="nf">call</span>	<span class="mi">0x80</span>	<span class="err">;</span> <span class="mh">0x80</span> <span class="p">&lt;</span><span class="no">main</span><span class="p">&gt;</span>
+  <span class="nl">78:</span>	<span class="mh">0c 94 44 00 </span>	<span class="nf">jmp</span>	<span class="mi">0x88</span>	<span class="err">;</span> <span class="mh">0x88</span> <span class="p">&lt;</span><span class="no">_exit</span><span class="p">&gt;</span>
+
+<span class="mh">0000007c</span> <span class="p">&lt;</span><span class="nf">__bad_interrupt</span><span class="p">&gt;:</span>
+  <span class="nl">7c:</span>	<span class="mh">0c 94 00 00 </span>	<span class="nf">jmp</span>	<span class="mi">0</span>	<span class="err">;</span> <span class="mh">0x0</span> <span class="p">&lt;</span><span class="no">__vectors</span><span class="p">&gt;</span>
+
+<span class="mh">00000080</span> <span class="p">&lt;</span><span class="nf">main</span><span class="p">&gt;:</span>
+  <span class="nl">80:</span>	<span class="mh">25 9a </span>      	<span class="nf">sbi</span>	<span class="mi">0x04</span><span class="p">,</span> <span class="mi">5</span>	<span class="err">;</span> <span class="mi">4</span>
+  <span class="nl">82:</span>	<span class="mh">2d 9a </span>      	<span class="nf">sbi</span>	<span class="mi">0x05</span><span class="p">,</span> <span class="mi">5</span>	<span class="err">;</span> <span class="mi">5</span>
+  <span class="nl">84:</span>	<span class="mh">2d 98 </span>      	<span class="nf">cbi</span>	<span class="mi">0x05</span><span class="p">,</span> <span class="mi">5</span>	<span class="err">;</span> <span class="mi">5</span>
+  <span class="nl">86:</span>	<span class="mh">fd cf </span>      	<span class="nf">rjmp</span>	<span class="no">.-6</span>      	<span class="err">;</span> <span class="mh">0x82</span> <span class="p">&lt;</span><span class="no">main</span><span class="p">+</span><span class="mi">0x2</span><span class="p">&gt;</span>
+
+<span class="mh">00000088</span> <span class="p">&lt;</span><span class="nf">_exit</span><span class="p">&gt;:</span>
+  <span class="nl">88:</span>	<span class="mh">f8 94 </span>      	<span class="nf">cli</span>
+
+<span class="mh">0000008a</span> <span class="p">&lt;</span><span class="nf">__stop_program</span><span class="p">&gt;:</span>
+  <span class="nl">8a:</span>	<span class="mh">ff cf </span>      	<span class="nf">rjmp</span>	<span class="no">.-2</span>      	<span class="err">;</span> <span class="mh">0x8a</span> <span class="p">&lt;</span><span class="no">__stop_program</span><span class="p">&gt;</span>
+</pre></div>
+
+       
+      <hr />
+      
+      <h2>
+        <a href="#template" id="template">#</a> Variant:
+        <code>template</code> <a class="link-top" href="#toc">^</a>
+      </h2>
+      <h3>Binary size</h3>
+      <pre>
+      AVR Memory Usage
+----------------
+Device: atmega328p
+
+Program:     140 bytes (0.4% Full)
+(.text + .data + .bootloader)
+
+Data:          0 bytes (0.0% Full)
+(.data + .bss + .noinit)
+      </pre>
+      <h3>Disassembly</h3>
+      <div class="highlight"><pre><span></span><span class="nl">build/template/firmware.elf</span><span class="p">:</span>     file format <span class="s">elf32-avr</span>
+
+
+Disassembly of section <span class="nl">.text</span><span class="p">:</span>
+
+<span class="mh">00000000</span> <span class="p">&lt;</span><span class="nf">__vectors</span><span class="p">&gt;:</span>
+   <span class="nl">0:</span>	<span class="mh">0c 94 34 00 </span>	<span class="nf">jmp</span>	<span class="mi">0x68</span>	<span class="err">;</span> <span class="mh">0x68</span> <span class="p">&lt;</span><span class="no">__ctors_end</span><span class="p">&gt;</span>
+   <span class="nl">4:</span>	<span class="mh">0c 94 3e 00 </span>	<span class="nf">jmp</span>	<span class="mi">0x7c</span>	<span class="err">;</span> <span class="mh">0x7c</span> <span class="p">&lt;</span><span class="no">__bad_interrupt</span><span class="p">&gt;</span>
+   <span class="nl">8:</span>	<span class="mh">0c 94 3e 00 </span>	<span class="nf">jmp</span>	<span class="mi">0x7c</span>	<span class="err">;</span> <span class="mh">0x7c</span> <span class="p">&lt;</span><span class="no">__bad_interrupt</span><span class="p">&gt;</span>
+   <span class="nl">c:</span>	<span class="mh">0c 94 3e 00 </span>	<span class="nf">jmp</span>	<span class="mi">0x7c</span>	<span class="err">;</span> <span class="mh">0x7c</span> <span class="p">&lt;</span><span class="no">__bad_interrupt</span><span class="p">&gt;</span>
+  <span class="nl">10:</span>	<span class="mh">0c 94 3e 00 </span>	<span class="nf">jmp</span>	<span class="mi">0x7c</span>	<span class="err">;</span> <span class="mh">0x7c</span> <span class="p">&lt;</span><span class="no">__bad_interrupt</span><span class="p">&gt;</span>
+  <span class="nl">14:</span>	<span class="mh">0c 94 3e 00 </span>	<span class="nf">jmp</span>	<span class="mi">0x7c</span>	<span class="err">;</span> <span class="mh">0x7c</span> <span class="p">&lt;</span><span class="no">__bad_interrupt</span><span class="p">&gt;</span>
+  <span class="nl">18:</span>	<span class="mh">0c 94 3e 00 </span>	<span class="nf">jmp</span>	<span class="mi">0x7c</span>	<span class="err">;</span> <span class="mh">0x7c</span> <span class="p">&lt;</span><span class="no">__bad_interrupt</span><span class="p">&gt;</span>
+  <span class="nl">1c:</span>	<span class="mh">0c 94 3e 00 </span>	<span class="nf">jmp</span>	<span class="mi">0x7c</span>	<span class="err">;</span> <span class="mh">0x7c</span> <span class="p">&lt;</span><span class="no">__bad_interrupt</span><span class="p">&gt;</span>
+  <span class="nl">20:</span>	<span class="mh">0c 94 3e 00 </span>	<span class="nf">jmp</span>	<span class="mi">0x7c</span>	<span class="err">;</span> <span class="mh">0x7c</span> <span class="p">&lt;</span><span class="no">__bad_interrupt</span><span class="p">&gt;</span>
+  <span class="nl">24:</span>	<span class="mh">0c 94 3e 00 </span>	<span class="nf">jmp</span>	<span class="mi">0x7c</span>	<span class="err">;</span> <span class="mh">0x7c</span> <span class="p">&lt;</span><span class="no">__bad_interrupt</span><span class="p">&gt;</span>
+  <span class="nl">28:</span>	<span class="mh">0c 94 3e 00 </span>	<span class="nf">jmp</span>	<span class="mi">0x7c</span>	<span class="err">;</span> <span class="mh">0x7c</span> <span class="p">&lt;</span><span class="no">__bad_interrupt</span><span class="p">&gt;</span>
+  <span class="nl">2c:</span>	<span class="mh">0c 94 3e 00 </span>	<span class="nf">jmp</span>	<span class="mi">0x7c</span>	<span class="err">;</span> <span class="mh">0x7c</span> <span class="p">&lt;</span><span class="no">__bad_interrupt</span><span class="p">&gt;</span>
+  <span class="nl">30:</span>	<span class="mh">0c 94 3e 00 </span>	<span class="nf">jmp</span>	<span class="mi">0x7c</span>	<span class="err">;</span> <span class="mh">0x7c</span> <span class="p">&lt;</span><span class="no">__bad_interrupt</span><span class="p">&gt;</span>
+  <span class="nl">34:</span>	<span class="mh">0c 94 3e 00 </span>	<span class="nf">jmp</span>	<span class="mi">0x7c</span>	<span class="err">;</span> <span class="mh">0x7c</span> <span class="p">&lt;</span><span class="no">__bad_interrupt</span><span class="p">&gt;</span>
+  <span class="nl">38:</span>	<span class="mh">0c 94 3e 00 </span>	<span class="nf">jmp</span>	<span class="mi">0x7c</span>	<span class="err">;</span> <span class="mh">0x7c</span> <span class="p">&lt;</span><span class="no">__bad_interrupt</span><span class="p">&gt;</span>
+  <span class="nl">3c:</span>	<span class="mh">0c 94 3e 00 </span>	<span class="nf">jmp</span>	<span class="mi">0x7c</span>	<span class="err">;</span> <span class="mh">0x7c</span> <span class="p">&lt;</span><span class="no">__bad_interrupt</span><span class="p">&gt;</span>
+  <span class="nl">40:</span>	<span class="mh">0c 94 3e 00 </span>	<span class="nf">jmp</span>	<span class="mi">0x7c</span>	<span class="err">;</span> <span class="mh">0x7c</span> <span class="p">&lt;</span><span class="no">__bad_interrupt</span><span class="p">&gt;</span>
+  <span class="nl">44:</span>	<span class="mh">0c 94 3e 00 </span>	<span class="nf">jmp</span>	<span class="mi">0x7c</span>	<span class="err">;</span> <span class="mh">0x7c</span> <span class="p">&lt;</span><span class="no">__bad_interrupt</span><span class="p">&gt;</span>
+  <span class="nl">48:</span>	<span class="mh">0c 94 3e 00 </span>	<span class="nf">jmp</span>	<span class="mi">0x7c</span>	<span class="err">;</span> <span class="mh">0x7c</span> <span class="p">&lt;</span><span class="no">__bad_interrupt</span><span class="p">&gt;</span>
+  <span class="nl">4c:</span>	<span class="mh">0c 94 3e 00 </span>	<span class="nf">jmp</span>	<span class="mi">0x7c</span>	<span class="err">;</span> <span class="mh">0x7c</span> <span class="p">&lt;</span><span class="no">__bad_interrupt</span><span class="p">&gt;</span>
+  <span class="nl">50:</span>	<span class="mh">0c 94 3e 00 </span>	<span class="nf">jmp</span>	<span class="mi">0x7c</span>	<span class="err">;</span> <span class="mh">0x7c</span> <span class="p">&lt;</span><span class="no">__bad_interrupt</span><span class="p">&gt;</span>
+  <span class="nl">54:</span>	<span class="mh">0c 94 3e 00 </span>	<span class="nf">jmp</span>	<span class="mi">0x7c</span>	<span class="err">;</span> <span class="mh">0x7c</span> <span class="p">&lt;</span><span class="no">__bad_interrupt</span><span class="p">&gt;</span>
+  <span class="nl">58:</span>	<span class="mh">0c 94 3e 00 </span>	<span class="nf">jmp</span>	<span class="mi">0x7c</span>	<span class="err">;</span> <span class="mh">0x7c</span> <span class="p">&lt;</span><span class="no">__bad_interrupt</span><span class="p">&gt;</span>
+  <span class="nl">5c:</span>	<span class="mh">0c 94 3e 00 </span>	<span class="nf">jmp</span>	<span class="mi">0x7c</span>	<span class="err">;</span> <span class="mh">0x7c</span> <span class="p">&lt;</span><span class="no">__bad_interrupt</span><span class="p">&gt;</span>
+  <span class="nl">60:</span>	<span class="mh">0c 94 3e 00 </span>	<span class="nf">jmp</span>	<span class="mi">0x7c</span>	<span class="err">;</span> <span class="mh">0x7c</span> <span class="p">&lt;</span><span class="no">__bad_interrupt</span><span class="p">&gt;</span>
+  <span class="nl">64:</span>	<span class="mh">0c 94 3e 00 </span>	<span class="nf">jmp</span>	<span class="mi">0x7c</span>	<span class="err">;</span> <span class="mh">0x7c</span> <span class="p">&lt;</span><span class="no">__bad_interrupt</span><span class="p">&gt;</span>
+
+<span class="mh">00000068</span> <span class="p">&lt;</span><span class="nf">__ctors_end</span><span class="p">&gt;:</span>
+  <span class="nl">68:</span>	<span class="mh">11 24 </span>      	<span class="nf">eor</span>	<span class="no">r1</span><span class="p">,</span> <span class="no">r1</span>
+  <span class="nl">6a:</span>	<span class="mh">1f be </span>      	<span class="nf">out</span>	<span class="mi">0x3f</span><span class="p">,</span> <span class="no">r1</span>	<span class="err">;</span> <span class="mi">63</span>
+  <span class="nl">6c:</span>	<span class="mh">cf ef </span>      	<span class="nf">ldi</span>	<span class="no">r28</span><span class="p">,</span> <span class="mi">0xFF</span>	<span class="err">;</span> <span class="mi">255</span>
+  <span class="nl">6e:</span>	<span class="mh">d8 e0 </span>      	<span class="nf">ldi</span>	<span class="no">r29</span><span class="p">,</span> <span class="mi">0x08</span>	<span class="err">;</span> <span class="mi">8</span>
+  <span class="nl">70:</span>	<span class="mh">de bf </span>      	<span class="nf">out</span>	<span class="mi">0x3e</span><span class="p">,</span> <span class="no">r29</span>	<span class="err">;</span> <span class="mi">62</span>
+  <span class="nl">72:</span>	<span class="mh">cd bf </span>      	<span class="nf">out</span>	<span class="mi">0x3d</span><span class="p">,</span> <span class="no">r28</span>	<span class="err">;</span> <span class="mi">61</span>
+  <span class="nl">74:</span>	<span class="mh">0e 94 40 00 </span>	<span class="nf">call</span>	<span class="mi">0x80</span>	<span class="err">;</span> <span class="mh">0x80</span> <span class="p">&lt;</span><span class="no">main</span><span class="p">&gt;</span>
+  <span class="nl">78:</span>	<span class="mh">0c 94 44 00 </span>	<span class="nf">jmp</span>	<span class="mi">0x88</span>	<span class="err">;</span> <span class="mh">0x88</span> <span class="p">&lt;</span><span class="no">_exit</span><span class="p">&gt;</span>
+
+<span class="mh">0000007c</span> <span class="p">&lt;</span><span class="nf">__bad_interrupt</span><span class="p">&gt;:</span>
+  <span class="nl">7c:</span>	<span class="mh">0c 94 00 00 </span>	<span class="nf">jmp</span>	<span class="mi">0</span>	<span class="err">;</span> <span class="mh">0x0</span> <span class="p">&lt;</span><span class="no">__vectors</span><span class="p">&gt;</span>
+
+<span class="mh">00000080</span> <span class="p">&lt;</span><span class="nf">main</span><span class="p">&gt;:</span>
+  <span class="nl">80:</span>	<span class="mh">20 9a </span>      	<span class="nf">sbi</span>	<span class="mi">0x04</span><span class="p">,</span> <span class="mi">0</span>	<span class="err">;</span> <span class="mi">4</span>
+  <span class="nl">82:</span>	<span class="mh">28 9a </span>      	<span class="nf">sbi</span>	<span class="mi">0x05</span><span class="p">,</span> <span class="mi">0</span>	<span class="err">;</span> <span class="mi">5</span>
+  <span class="nl">84:</span>	<span class="mh">28 98 </span>      	<span class="nf">cbi</span>	<span class="mi">0x05</span><span class="p">,</span> <span class="mi">0</span>	<span class="err">;</span> <span class="mi">5</span>
+  <span class="nl">86:</span>	<span class="mh">fd cf </span>      	<span class="nf">rjmp</span>	<span class="no">.-6</span>      	<span class="err">;</span> <span class="mh">0x82</span> <span class="p">&lt;</span><span class="no">main</span><span class="p">+</span><span class="mi">0x2</span><span class="p">&gt;</span>
+
+<span class="mh">00000088</span> <span class="p">&lt;</span><span class="nf">_exit</span><span class="p">&gt;:</span>
+  <span class="nl">88:</span>	<span class="mh">f8 94 </span>      	<span class="nf">cli</span>
+
+<span class="mh">0000008a</span> <span class="p">&lt;</span><span class="nf">__stop_program</span><span class="p">&gt;:</span>
+  <span class="nl">8a:</span>	<span class="mh">ff cf </span>      	<span class="nf">rjmp</span>	<span class="no">.-2</span>      	<span class="err">;</span> <span class="mh">0x8a</span> <span class="p">&lt;</span><span class="no">__stop_program</span><span class="p">&gt;</span>
+</pre></div>
+
+      
+      <h1>Author</h1>
+      <p><a href="https://vtavernier.github.io/">Vincent Tavernier</a></p>
+      
+    </div>
+  </body>
+</html>
