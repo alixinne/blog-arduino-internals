@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Arduino AVR Assembly comparison</title>
+    <style>
+      #container {
+        max-width: 800px;
+        margin: 0 auto;
+      }
+
+      {{ style }}
+
+      .highlight .err {
+        border: none;
+      }
+
+      .link-top {
+       font-size: small;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="container">
+      <h1>Arduino AVR Assembly comparison</h1>
+      <p>
+        This page was generated from <a
+          href="https://github.com/vtavernier/blog-arduino-internals">this
+          repository</a>, with the goal of demonstrating the code generation
+        differences between the Arduino framework built-ins for AVR
+        microcontrollers, and corresponding native AVR code.
+
+        See the accompanying <a
+          href="http://vtavernier.github.io/posts/arduino-internals-whats-behind-the-magic/">blog
+          post</a> for context.
+      </p>
+      <h2><a href="#toc" id="toc">#</a> Table of contents</h2>
+      <ul>
+        {% for env in envs %}
+        <li>
+          <a href="#{{ env.name }}">{{ env.name }}</a>
+        </li>
+        {% endfor %}
+      </ul>
+
+      {% for env in envs %} {% if not loop.first %}
+      <hr />
+      {% endif %}
+      <h2>
+        <a href="#{{ env.name }}" id="{{ env.name }}">#</a> Variant:
+        <code>{{ env.name }}</code> <a class="link-top" href="#toc">^</a>
+      </h2>
+      <h3>Binary size</h3>
+      <pre>
+      {{ env.size | e }}
+      </pre>
+      <h3>Disassembly</h3>
+      {{ env.formatted }}
+      {% endfor %}
+      <h1>Author</h1>
+      <p><a href="https://vtavernier.github.io/">Vincent Tavernier</a></p>
+      {# vim: set ft=jinja.html ts=2 sw=2 et: #}
+    </div>
+  </body>
+</html>

@@ -4,3 +4,4 @@
 .ccls
 .venv
 build/
+public/
