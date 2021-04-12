@@ -128,6 +128,18 @@
         <a href="#arduino" id="arduino">#</a> Variant:
         <code>arduino</code> <a class="link-top" href="#toc">^</a>
       </h2>
+      <h3>C++ Source</h3>
+      <div class="highlight"><pre><span></span><span class="c1">// main.cpp</span>
+<span class="cp">#include</span> <span class="cpf">&lt;Arduino.h&gt;</span><span class="cp"></span>
+
+<span class="kt">void</span> <span class="nf">setup</span><span class="p">()</span> <span class="p">{</span> <span class="n">pinMode</span><span class="p">(</span><span class="n">LED_BUILTIN</span><span class="p">,</span> <span class="n">OUTPUT</span><span class="p">);</span> <span class="p">}</span>
+
+<span class="kt">void</span> <span class="nf">loop</span><span class="p">()</span> <span class="p">{</span>
+  <span class="n">digitalWrite</span><span class="p">(</span><span class="n">LED_BUILTIN</span><span class="p">,</span> <span class="n">HIGH</span><span class="p">);</span>
+  <span class="n">digitalWrite</span><span class="p">(</span><span class="n">LED_BUILTIN</span><span class="p">,</span> <span class="n">LOW</span><span class="p">);</span>
+<span class="p">}</span>
+</pre></div>
+
       <h3>Binary size</h3>
       <pre>
       AVR Memory Usage
@@ -447,6 +459,20 @@ Disassembly of section <span class="nl">.text</span><span class="p">:</span>
         <a href="#avr" id="avr">#</a> Variant:
         <code>avr</code> <a class="link-top" href="#toc">^</a>
       </h2>
+      <h3>C++ Source</h3>
+      <div class="highlight"><pre><span></span><span class="c1">// main.cpp</span>
+<span class="cp">#include</span> <span class="cpf">&lt;avr/io.h&gt;</span><span class="cp"></span>
+
+<span class="kt">int</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
+  <span class="n">DDRB</span> <span class="o">|=</span> <span class="p">(</span><span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="n">PB5</span><span class="p">);</span>
+
+  <span class="k">while</span> <span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="p">{</span>
+    <span class="n">PORTB</span> <span class="o">|=</span> <span class="p">(</span><span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="n">PB5</span><span class="p">);</span>
+    <span class="n">PORTB</span> <span class="o">&amp;=</span> <span class="o">~</span><span class="p">(</span><span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="n">PB5</span><span class="p">);</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+
       <h3>Binary size</h3>
       <pre>
       AVR Memory Usage
@@ -526,6 +552,123 @@ Disassembly of section <span class="nl">.text</span><span class="p">:</span>
         <a href="#template" id="template">#</a> Variant:
         <code>template</code> <a class="link-top" href="#toc">^</a>
       </h2>
+      <h3>C++ Source</h3>
+      <div class="highlight"><pre><span></span><span class="c1">// Templateduino.h</span>
+<span class="cp">#ifndef _TEMPLATEDUINO_H_</span>
+<span class="cp">#define _TEMPLATEDUINO_H_</span>
+
+<span class="cp">#include</span> <span class="cpf">&lt;stdint.h&gt;</span><span class="cp"></span>
+
+<span class="c1">// Platform-independent code</span>
+
+<span class="cp">#define LOW 0</span>
+<span class="cp">#define HIGH 1</span>
+
+<span class="c1">/// Pin operation mode</span>
+<span class="k">enum</span> <span class="k">class</span> <span class="nc">PinMode</span> <span class="p">{</span>
+  <span class="n">Input</span><span class="p">,</span>
+  <span class="n">Output</span><span class="p">,</span>
+<span class="p">};</span>
+
+<span class="c1">/// Hardware pin wrapper</span>
+<span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="n">PinTraits</span><span class="o">&gt;</span> <span class="k">struct</span> <span class="nl">ArduinoPin</span> <span class="p">:</span> <span class="n">PinTraits</span> <span class="p">{</span>
+  <span class="c1">/// Set the pin operating mode</span>
+  <span class="kt">void</span> <span class="n">setMode</span><span class="p">(</span><span class="k">const</span> <span class="n">PinMode</span> <span class="n">mode</span><span class="p">)</span> <span class="k">const</span> <span class="p">{</span> <span class="n">PinTraits</span><span class="o">::</span><span class="n">setMode</span><span class="p">(</span><span class="n">mode</span><span class="p">);</span> <span class="p">}</span>
+
+  <span class="c1">/// Clear the output pin (set LOW)</span>
+  <span class="kt">void</span> <span class="n">clear</span><span class="p">()</span> <span class="k">const</span> <span class="p">{</span> <span class="n">PinTraits</span><span class="o">::</span><span class="n">clear</span><span class="p">();</span> <span class="p">}</span>
+
+  <span class="c1">/// Set the input pin (set HIGH)</span>
+  <span class="kt">void</span> <span class="n">set</span><span class="p">()</span> <span class="k">const</span> <span class="p">{</span> <span class="n">PinTraits</span><span class="o">::</span><span class="n">set</span><span class="p">();</span> <span class="p">}</span>
+
+  <span class="c1">/// Write the pin value</span>
+  <span class="kt">void</span> <span class="n">write</span><span class="p">(</span><span class="k">const</span> <span class="kt">uint8_t</span> <span class="n">val</span><span class="p">)</span> <span class="k">const</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">val</span><span class="p">)</span> <span class="p">{</span>
+      <span class="n">set</span><span class="p">();</span>
+    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+      <span class="n">clear</span><span class="p">();</span>
+    <span class="p">}</span>
+  <span class="p">}</span>
+<span class="p">};</span>
+
+<span class="c1">// Include board definitions, could match on -D flags</span>
+<span class="cp">#ifdef ARDUINO_AVR_UNO</span>
+<span class="cp">#include</span> <span class="cpf">&quot;TemplateduinoUno.h&quot;</span><span class="cp"></span>
+<span class="cp">#else</span>
+<span class="cp">#error &quot;Unsupported platform!&quot;</span>
+<span class="cp">#endif</span>
+
+<span class="cp">#endif </span><span class="cm">/* _TEMPLATEDUINO_H_ */</span><span class="cp"></span>
+
+<span class="c1">// TemplateduinoAvr.h</span>
+<span class="cp">#ifndef _TEMPLATEDUINO_AVR_H_</span>
+<span class="cp">#define _TEMPLATEDUINO_AVR_H_</span>
+
+<span class="c1">// Include Platform-independent API</span>
+<span class="cp">#include</span> <span class="cpf">&quot;Templateduino.h&quot;</span><span class="cp"></span>
+
+<span class="c1">// Load AVR headers</span>
+<span class="cp">#include</span> <span class="cpf">&lt;avr/io.h&gt;</span><span class="cp"></span>
+
+<span class="c1">// Platform API (AVR)</span>
+<span class="k">template</span> <span class="o">&lt;</span><span class="kt">uintptr_t</span> <span class="n">DdrAddr</span><span class="p">,</span> <span class="kt">uintptr_t</span> <span class="n">PortAddr</span><span class="p">,</span> <span class="kt">uint8_t</span> <span class="n">Pin</span><span class="o">&gt;</span>
+<span class="k">struct</span> <span class="n">AvrPinTraits</span> <span class="p">{</span>
+  <span class="kt">void</span> <span class="n">setMode</span><span class="p">(</span><span class="k">const</span> <span class="n">PinMode</span> <span class="n">mode</span><span class="p">)</span> <span class="k">const</span> <span class="p">{</span>
+    <span class="k">switch</span> <span class="p">(</span><span class="n">mode</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">case</span> <span class="n">PinMode</span><span class="o">::</span><span class="nl">Input</span><span class="p">:</span>
+      <span class="o">*</span><span class="p">((</span><span class="k">volatile</span> <span class="kt">uint8_t</span> <span class="o">*</span><span class="p">)</span><span class="n">DdrAddr</span><span class="p">)</span> <span class="o">&amp;=</span> <span class="o">~</span><span class="p">(</span><span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="n">Pin</span><span class="p">);</span>
+      <span class="k">break</span><span class="p">;</span>
+    <span class="k">case</span> <span class="n">PinMode</span><span class="o">::</span><span class="nl">Output</span><span class="p">:</span>
+      <span class="o">*</span><span class="p">((</span><span class="k">volatile</span> <span class="kt">uint8_t</span> <span class="o">*</span><span class="p">)</span><span class="n">DdrAddr</span><span class="p">)</span> <span class="o">|=</span> <span class="p">(</span><span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="n">Pin</span><span class="p">);</span>
+      <span class="k">break</span><span class="p">;</span>
+    <span class="p">}</span>
+  <span class="p">}</span>
+
+  <span class="kt">void</span> <span class="n">clear</span><span class="p">()</span> <span class="k">const</span> <span class="p">{</span> <span class="o">*</span><span class="p">((</span><span class="k">volatile</span> <span class="kt">uint8_t</span> <span class="o">*</span><span class="p">)</span><span class="n">PortAddr</span><span class="p">)</span> <span class="o">&amp;=</span> <span class="o">~</span><span class="p">(</span><span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="n">Pin</span><span class="p">);</span> <span class="p">}</span>
+
+  <span class="kt">void</span> <span class="n">set</span><span class="p">()</span> <span class="k">const</span> <span class="p">{</span> <span class="o">*</span><span class="p">((</span><span class="k">volatile</span> <span class="kt">uint8_t</span> <span class="o">*</span><span class="p">)</span><span class="n">PortAddr</span><span class="p">)</span> <span class="o">|=</span> <span class="p">(</span><span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="n">Pin</span><span class="p">);</span> <span class="p">}</span>
+<span class="p">};</span>
+
+<span class="cp">#endif </span><span class="cm">/* _TEMPLATEDUINO_AVR_H_ */</span><span class="cp"></span>
+
+<span class="c1">// TemplateduinoUno.h</span>
+<span class="cp">#ifndef _TEMPLATEDUINO_UNO_H_</span>
+<span class="cp">#define _TEMPLATEDUINO_UNO_H_</span>
+
+<span class="cp">#include</span> <span class="cpf">&lt;stddef.h&gt;</span><span class="cp"></span>
+<span class="cp">#include</span> <span class="cpf">&lt;stdint.h&gt;</span><span class="cp"></span>
+
+<span class="c1">// Include platform definition</span>
+<span class="cp">#include</span> <span class="cpf">&quot;TemplateduinoAvr.h&quot;</span><span class="cp"></span>
+
+<span class="c1">// Board definition</span>
+
+<span class="c1">// Workaround for _IO macros not being constexpr: those will be constant-folded</span>
+<span class="c1">// away</span>
+<span class="k">const</span> <span class="kt">uintptr_t</span> <span class="n">DirB</span> <span class="o">=</span> <span class="k">reinterpret_cast</span><span class="o">&lt;</span><span class="kt">uintptr_t</span><span class="o">&gt;</span><span class="p">(</span><span class="o">&amp;</span><span class="n">DDRB</span><span class="p">);</span>
+<span class="k">const</span> <span class="kt">uintptr_t</span> <span class="n">PortB</span> <span class="o">=</span> <span class="k">reinterpret_cast</span><span class="o">&lt;</span><span class="kt">uintptr_t</span><span class="o">&gt;</span><span class="p">(</span><span class="o">&amp;</span><span class="n">PORTB</span><span class="p">);</span>
+
+<span class="c1">// Actual pin definitions</span>
+<span class="k">const</span> <span class="n">ArduinoPin</span><span class="o">&lt;</span><span class="n">AvrPinTraits</span><span class="o">&lt;</span><span class="n">DirB</span><span class="p">,</span> <span class="n">PortB</span><span class="p">,</span> <span class="n">PB0</span><span class="o">&gt;&gt;</span> <span class="n">D13</span><span class="p">{};</span>
+
+<span class="c1">// These are stateless, so we can  have aliases for free</span>
+<span class="k">const</span> <span class="n">ArduinoPin</span><span class="o">&lt;</span><span class="n">AvrPinTraits</span><span class="o">&lt;</span><span class="n">DirB</span><span class="p">,</span> <span class="n">PortB</span><span class="p">,</span> <span class="n">PB0</span><span class="o">&gt;&gt;</span> <span class="n">BuiltinLed</span><span class="p">{};</span>
+
+<span class="cp">#endif </span><span class="cm">/* _TEMPLATEDUINO_UNO_H_ */</span><span class="cp"></span>
+
+<span class="c1">// main.cpp</span>
+<span class="cp">#include</span> <span class="cpf">&quot;Templateduino.h&quot;</span><span class="cp"></span>
+
+<span class="kt">int</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
+  <span class="n">BuiltinLed</span><span class="p">.</span><span class="n">setMode</span><span class="p">(</span><span class="n">PinMode</span><span class="o">::</span><span class="n">Output</span><span class="p">);</span>
+
+  <span class="k">while</span> <span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="p">{</span>
+    <span class="n">BuiltinLed</span><span class="p">.</span><span class="n">write</span><span class="p">(</span><span class="n">HIGH</span><span class="p">);</span>
+    <span class="n">BuiltinLed</span><span class="p">.</span><span class="n">write</span><span class="p">(</span><span class="n">LOW</span><span class="p">);</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+
       <h3>Binary size</h3>
       <pre>
       AVR Memory Usage
