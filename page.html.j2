@@ -52,7 +52,13 @@
       {% endif %}
       <h2>
         <a href="#{{ env.name }}" id="{{ env.name }}">#</a> Variant:
-        <code>{{ env.name }}</code> <a class="link-top" href="#toc">^</a>
+        <a
+          href="https://github.com/vtavernier/blog-arduino-internals/tree/master/src/{{
+            env.name
+          }}"
+          ><code>{{ env.name }}</code></a
+        >
+        <a class="link-top" href="#toc">^</a>
       </h2>
       <h3>C++ Source</h3>
       {{ env.cpp_formatted }}
