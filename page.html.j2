@@ -54,6 +54,8 @@
         <a href="#{{ env.name }}" id="{{ env.name }}">#</a> Variant:
         <code>{{ env.name }}</code> <a class="link-top" href="#toc">^</a>
       </h2>
+      <h3>C++ Source</h3>
+      {{ env.cpp_formatted }}
       <h3>Binary size</h3>
       <pre>
       {{ env.size | e }}
