@@ -15,7 +15,7 @@ const uintptr_t DirB = reinterpret_cast<uintptr_t>(&DDRB);
 const uintptr_t PortB = reinterpret_cast<uintptr_t>(&PORTB);
 
 // Actual pin definitions
-const ArduinoPin<AvrPinTraits<DirB, PortB, PB0>> D13{};
+const ArduinoPin<AvrPinTraits<DirB, PortB, PB5>> D13{};
 
 // Alias pin names using references
 const auto &BuiltinLed{D13};
