@@ -29,6 +29,6 @@ build/%/firmware.elf: src/%/main.cpp
 	pio run -e $(patsubst src/%/main.cpp,%,$^)
 
 clean:
-	rm -f $(OUT_FILES)
+	rm -f $(OUT_FILES) $(patsubst %,build/%/firmware.elf,$(ENVS))
 
 .PHONY: all clean
