@@ -661,7 +661,7 @@ Disassembly of section <span class="nl">.text</span><span class="p">:</span>
 <span class="k">const</span> <span class="kt">uintptr_t</span> <span class="n">PortB</span> <span class="o">=</span> <span class="k">reinterpret_cast</span><span class="o">&lt;</span><span class="kt">uintptr_t</span><span class="o">&gt;</span><span class="p">(</span><span class="o">&amp;</span><span class="n">PORTB</span><span class="p">);</span>
 
 <span class="c1">// Actual pin definitions</span>
-<span class="k">const</span> <span class="n">ArduinoPin</span><span class="o">&lt;</span><span class="n">AvrPinTraits</span><span class="o">&lt;</span><span class="n">DirB</span><span class="p">,</span> <span class="n">PortB</span><span class="p">,</span> <span class="n">PB0</span><span class="o">&gt;&gt;</span> <span class="n">D13</span><span class="p">{};</span>
+<span class="k">const</span> <span class="n">ArduinoPin</span><span class="o">&lt;</span><span class="n">AvrPinTraits</span><span class="o">&lt;</span><span class="n">DirB</span><span class="p">,</span> <span class="n">PortB</span><span class="p">,</span> <span class="n">PB5</span><span class="o">&gt;&gt;</span> <span class="n">D13</span><span class="p">{};</span>
 
 <span class="c1">// Alias pin names using references</span>
 <span class="k">const</span> <span class="k">auto</span> <span class="o">&amp;</span><span class="n">BuiltinLed</span><span class="p">{</span><span class="n">D13</span><span class="p">};</span>
@@ -741,9 +741,9 @@ Disassembly of section <span class="nl">.text</span><span class="p">:</span>
   <span class="nl">7c:</span>	<span class="mh">0c 94 00 00 </span>	<span class="nf">jmp</span>	<span class="mi">0</span>	<span class="err">;</span> <span class="mh">0x0</span> <span class="p">&lt;</span><span class="no">__vectors</span><span class="p">&gt;</span>
 
 <span class="mh">00000080</span> <span class="p">&lt;</span><span class="nf">main</span><span class="p">&gt;:</span>
-  <span class="nl">80:</span>	<span class="mh">20 9a </span>      	<span class="nf">sbi</span>	<span class="mi">0x04</span><span class="p">,</span> <span class="mi">0</span>	<span class="err">;</span> <span class="mi">4</span>
-  <span class="nl">82:</span>	<span class="mh">28 9a </span>      	<span class="nf">sbi</span>	<span class="mi">0x05</span><span class="p">,</span> <span class="mi">0</span>	<span class="err">;</span> <span class="mi">5</span>
-  <span class="nl">84:</span>	<span class="mh">28 98 </span>      	<span class="nf">cbi</span>	<span class="mi">0x05</span><span class="p">,</span> <span class="mi">0</span>	<span class="err">;</span> <span class="mi">5</span>
+  <span class="nl">80:</span>	<span class="mh">25 9a </span>      	<span class="nf">sbi</span>	<span class="mi">0x04</span><span class="p">,</span> <span class="mi">5</span>	<span class="err">;</span> <span class="mi">4</span>
+  <span class="nl">82:</span>	<span class="mh">2d 9a </span>      	<span class="nf">sbi</span>	<span class="mi">0x05</span><span class="p">,</span> <span class="mi">5</span>	<span class="err">;</span> <span class="mi">5</span>
+  <span class="nl">84:</span>	<span class="mh">2d 98 </span>      	<span class="nf">cbi</span>	<span class="mi">0x05</span><span class="p">,</span> <span class="mi">5</span>	<span class="err">;</span> <span class="mi">5</span>
   <span class="nl">86:</span>	<span class="mh">fd cf </span>      	<span class="nf">rjmp</span>	<span class="no">.-6</span>      	<span class="err">;</span> <span class="mh">0x82</span> <span class="p">&lt;</span><span class="no">main</span><span class="p">+</span><span class="mi">0x2</span><span class="p">&gt;</span>
 
 <span class="mh">00000088</span> <span class="p">&lt;</span><span class="nf">_exit</span><span class="p">&gt;:</span>
