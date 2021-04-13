@@ -1,10 +1,10 @@
-#include "Templateduino.h"
+#include "Arduino.h"
 
 int main() {
-  BuiltinLed.setMode(PinMode::Output);
+  pinMode(LED_BUILTIN, OUTPUT);
 
   while (1) {
-    BuiltinLed.write(HIGH);
-    BuiltinLed.write(LOW);
+    digitalWrite(LED_BUILTIN, HIGH);
+    digitalWrite(LED_BUILTIN, LOW);
   }
 }

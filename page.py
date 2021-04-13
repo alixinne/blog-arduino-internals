@@ -6,8 +6,7 @@ from pygments.lexers.asm import CppObjdumpLexer as AssemblyLexer, CppLexer
 from pygments.formatters import HtmlFormatter
 from jinja2 import Template
 
-known_envs_files = {'template': [
-    'Templateduino.h', 'TemplateduinoAvr.h', 'TemplateduinoUno.h']}
+known_envs_files = {}
 
 
 def prefix_source(filename, name):

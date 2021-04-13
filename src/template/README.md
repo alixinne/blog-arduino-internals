@@ -18,19 +18,21 @@ This also allows us to split various parts of the API to allow platform-independ
 * [`TemplateduinoAvr.h`](TemplateduinoAvr.h): platform definition file for AVR
   platforms. This contains common code used to implement definitions for the
   various boards using the same AVR platform.
+* [`Arduino.h`](Arduino.h): compatibility header providing the same interface
+  as the Arduino framework.
 
 Note that even with all those abstraction layers, the following entry point
 will compile to the exact same assembly as the optimal [AVR variant](../avr).
 
 ```cpp
-#include "Templateduino.h"
+#include "Arduino.h"
 
 int main() {
-  BuiltinLed.setMode(PinMode::Output);
+  pinMode(LED_BUILTIN, OUTPUT);
 
   while (1) {
-    BuiltinLed.write(HIGH);
-    BuiltinLed.write(LOW);
+    digitalWrite(LED_BUILTIN, HIGH);
+    digitalWrite(LED_BUILTIN, LOW);
   }
 }
 ```
