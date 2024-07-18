@@ -2,10 +2,10 @@
 
 This repository contains the source code for the analysis detailed in the blog
 article
-http://vtavernier.github.io/posts/arduino-internals-whats-behind-the-magic/.
+http://alixinne.github.io/posts/arduino-internals-whats-behind-the-magic/.
 
 The detailed report is published at
-https://vtavernier.github.io/blog-arduino-internals/.
+https://alixinne.github.io/blog-arduino-internals/.
 
 ## Usage
 
@@ -36,4 +36,4 @@ variant, but with the same readability as the `arduino` variant.
 
 ## Author
 
-Vincent Tavernier <vince.tavernier@gmail.com>
+Alixinne <alixinne@pm.me>
